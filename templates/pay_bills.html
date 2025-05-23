@@ -1,0 +1,302 @@
+{% extends "layout.html" %}
+
+{% block title %}Pay Bills - PayMe{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Pay Bills</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div id="servicesView">
+                        <h5 class="mb-4">Select Bill to Pay</h5>
+                        
+                        <div class="row g-3">
+                            <!-- Electricity -->
+                            <div class="col-md-6">
+                                <div class="service-card" onclick="selectService('TANESCO', 'Electricity Bill')">
+                                    <div class="service-icon bg-danger">
+                                        <i class="fas fa-bolt"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h6>TANESCO</h6>
+                                        <p class="text-muted mb-0">Electricity Bill</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Water -->
+                            <div class="col-md-6">
+                                <div class="service-card" onclick="selectService('DAWASCO', 'Water Bill')">
+                                    <div class="service-icon bg-info">
+                                        <i class="fas fa-tint"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h6>DAWASCO</h6>
+                                        <p class="text-muted mb-0">Water Bill</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Internet -->
+                            <div class="col-md-6">
+                                <div class="service-card" onclick="selectService('Vodacom', 'Internet Bill')">
+                                    <div class="service-icon bg-success">
+                                        <i class="fas fa-wifi"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h6>Vodacom</h6>
+                                        <p class="text-muted mb-0">Internet Bill</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- TV -->
+                            <div class="col-md-6">
+                                <div class="service-card" onclick="selectService('DStv', 'TV Subscription')">
+                                    <div class="service-icon bg-warning">
+                                        <i class="fas fa-tv"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h6>DStv</h6>
+                                        <p class="text-muted mb-0">TV Subscription</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Government -->
+                            <div class="col-md-6">
+                                <div class="service-card" onclick="selectService('TRA', 'Tax Payment')">
+                                    <div class="service-icon bg-secondary">
+                                        <i class="fas fa-landmark"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h6>TRA</h6>
+                                        <p class="text-muted mb-0">Tax Payment</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('pay_bills') }}" id="paymentForm" class="d-none">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" id="selectedService" name="service">
+                        
+                        <h5 class="mb-4">Pay <span id="serviceName"></span></h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Account Number</label>
+                            <input type="text" name="account_number" class="form-control form-control-lg" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Amount (TZS)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">TZS</span>
+                                <input type="number" name="amount" class="form-control form-control-lg" min="100" step="100" required>
+                                <button type="button" class="btn btn-outline-secondary" id="quickAmount5000">5,000</button>
+                                <button type="button" class="btn btn-outline-secondary" id="quickAmount10000">10,000</button>
+                            </div>
+                            <small class="text-muted">Minimum: 100 TZS</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Payment Method</label>
+                            <select name="payment_method" class="form-select form-select-lg" required>
+                                <option value="">Select payment method</option>
+                                <option value="wallet">PayMe Wallet ({{ wallet_balance|format_currency }})</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}" data-balance="{{ method.balance }}">
+                                    {{ method.provider }} (••••{{ method.account_number[-4:] }}) - {{ method.balance|format_currency }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Available: <span id="accountBalance">{{ total_balance|format_currency }}</span></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Reference (Optional)</label>
+                            <input type="text" name="reference" class="form-control" placeholder="e.g., January bill" maxlength="50">
+                        </div>
+
+                        <!-- Transaction Summary -->
+                        <div class="card mb-4 border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Payment Summary</h5>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Bill Amount:</span>
+                                    <strong id="billAmount">0.00 TZS</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Fee:</span>
+                                    <strong id="feeAmount">0.00 TZS</strong>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total:</span>
+                                    <strong id="totalAmount">0.00 TZS</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i> Pay Now
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="cancelPayment()">
+                                <i class="fas fa-arrow-left me-2"></i> Back
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.service-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.service-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #0d6efd;
+}
+
+.service-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.service-details h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+#quickAmount5000, #quickAmount10000 {
+    transition: all 0.2s;
+}
+
+#quickAmount5000:hover, #quickAmount10000:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+#submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.querySelector('input[name="amount"]');
+    const paymentMethodSelect = document.querySelector('select[name="payment_method"]');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Quick amount buttons
+    document.getElementById('quickAmount5000').addEventListener('click', function() {
+        amountInput.value = '5000';
+        updateSummary();
+    });
+    
+    document.getElementById('quickAmount10000').addEventListener('click', function() {
+        amountInput.value = '10000';
+        updateSummary();
+    });
+    
+    // Amount input live update
+    amountInput.addEventListener('input', updateSummary);
+    
+    // Payment method change
+    paymentMethodSelect.addEventListener('change', updateSummary);
+    
+    function updateSummary() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const fee = calculateFee(amount);
+        const total = amount + fee;
+        
+        // Update summary display
+        document.getElementById('billAmount').textContent = amount.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+        document.getElementById('feeAmount').textContent = fee.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+        document.getElementById('totalAmount').textContent = total.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+        
+        // Validate balance
+        const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            let balance = 0;
+            if (selectedOption.value === 'wallet') {
+                balance = parseFloat("{{ wallet_balance }}") || 0;
+            } else {
+                balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            }
+            
+            submitBtn.disabled = total > balance;
+        }
+    }
+    
+    function calculateFee(amount) {
+        // 1% fee with minimum 100 TZS
+        return Math.max(100, amount * 0.01);
+    }
+});
+
+function selectService(service, displayName) {
+    document.getElementById('serviceName').textContent = displayName;
+    document.getElementById('selectedService').value = service;
+    document.getElementById('servicesView').classList.add('d-none');
+    document.getElementById('paymentForm').classList.remove('d-none');
+    document.querySelector('input[name="amount"]').focus();
+}
+
+function cancelPayment() {
+    document.getElementById('paymentForm').classList.add('d-none');
+    document.getElementById('servicesView').classList.remove('d-none');
+    document.getElementById('paymentForm').reset();
+}
+</script>
+{% endblock %}

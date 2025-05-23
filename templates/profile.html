@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block title %}My Profile - PayMe{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Left Column - Profile Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-lg mx-auto mb-3">
+                            <div class="avatar-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                {{ user.username[0]|upper }}
+                            </div>
+                        </div>
+                        <h4>{{ user.username }}</h4>
+                        <p class="text-muted">Member since {{ user.created_at.strftime('%b %Y') }}</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('update_profile') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ user.phone }}" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Activity -->
+        <div class="col-lg-8">
+            <!-- Payment Methods -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Methods</h4>
+                </div>
+                <div class="card-body">
+                    {% if payment_methods %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Provider</th>
+                                    <th>Account Number</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for method in payment_methods %}
+                                <tr>
+                                    <td>{{ method.method_type|title }}</td>
+                                    <td>{{ method.provider }}</td>
+                                    <td>•••• {{ method.account_number[-4:] }}</td>
+                                    <td>{{ method.balance|format_currency }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>No payment methods added yet.
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('payment_methods') }}" class="btn btn-outline-success">
+                        <i class="fas fa-plus-circle me-2"></i>Add Payment Method
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Recent Transactions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Recent Transactions</h4>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                    <div class="list-group">
+                        {% for tx in transactions %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ tx.description }}</h6>
+                                <small class="text-{% if tx.amount > 0 %}success{% else %}danger{% endif %}">
+                                    {{ tx.amount|format_currency }}
+                                </small>
+                            </div>
+                            <small class="text-muted">
+                                <i class="far fa-clock me-1"></i>
+                                {{ tx.timestamp.strftime('%b %d, %Y %I:%M %p') }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>No transactions yet.
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('transactions') }}" class="btn btn-outline-info mt-3">
+                        <i class="fas fa-history me-2"></i>View All Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .list-group-item {
+        transition: all 0.2s;
+    }
+    
+    .list-group-item:hover {
+        transform: translateX(5px);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-radius: 0 !important;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+</style>
+{% endblock %}

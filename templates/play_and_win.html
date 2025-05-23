@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Play & Win{% endblock %}
+{% block content %}
+<div class="form-container text-center">
+    <h2 class="mb-4">Play & Win</h2>
+    <p>Click the button below for a chance to win up to 500 TZS!</p>
+    <form method="post">
+        <button type="submit" class="btn btn-success">Play Now</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-link mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

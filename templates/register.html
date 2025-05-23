@@ -1,0 +1,1116 @@
+{% extends "layout.html" %}
+{% block title %}Register - PayMe Tanzania{% endblock %}
+
+{# --- CONTENT BLOCK START --- #}
+{% block content %}
+<div class="auth-wrapper register-wrapper">
+
+    {# Illustration Column #}
+    <div class="auth-illustration d-none d-lg-flex">
+        <div class="illustration-content text-center text-white p-5">
+            <img src="{{ url_for('static', filename='icons/register-illustration.jpg') }}" alt="PayMe Secure Registration" class="img-fluid mb-4 floating" style="max-width: 400px;">
+            <h2 class="mb-3 fw-bold">Fast, Secure Payments Start Here</h2>
+            <p class="lead mb-4 opacity-75">Join PayMe Tanzania and experience the future of money transfers.</p>
+            <div class="payment-method-icons d-flex justify-content-center gap-4 mt-5">
+                <span class="payment-icon bg-white text-primary shadow-sm pulse-slow"><i class="fa-solid fa-sim-card fa-lg"></i></span>
+                <span class="payment-icon bg-white text-primary shadow-sm pulse-slow delay-1"><i class="fa-solid fa-building-columns fa-lg"></i></span>
+                <span class="payment-icon bg-white text-primary shadow-sm pulse-slow delay-2"><i class="fa-solid fa-mobile-screen-button fa-lg"></i></span>
+            </div>
+        </div>
+    </div>
+
+    {# Form Column #}
+    <div class="auth-form-container">
+        <div class="auth-card shadow-lg">
+            <!-- Card Header -->
+            <div class="auth-header text-center mb-4">
+                 <a href="{{ url_for('index') }}" class="logo-link">
+                    <i class="fa-solid fa-wallet auth-logo-icon text-primary mb-3 pulse"></i>
+                </a>
+                <h1 class="auth-title h3 mb-1">Create Your Account</h1>
+                <p class="auth-subtitle text-muted">Quick and secure sign-up process.</p>
+            </div>
+
+            {# --- STEP 1: Phone Verification Form --- #}
+            <form method="POST" action="{{ url_for('register') }}" class="auth-form needs-validation animate__animated animate__fadeIn" id="phoneVerificationForm" novalidate>
+                {{ form.hidden_tag() if form else '' }}
+
+                <div class="step-indicator mb-4">
+                    <div class="steps">
+                        <div class="step active">
+                            <div class="step-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <div class="step-label">Phone</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="step-label">Verify</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+                            <div class="step-label">Account</div>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <p class="text-center text-muted mb-3 small">Enter your phone number to receive a verification code.</p>
+
+                <!-- Phone Field -->
+                <div class="form-floating mb-4 has-icon" id="phone-wrapper">
+                    <input type="tel" id="phone" name="phone" class="form-control form-control-lg" placeholder="Phone Number (+255...)" required pattern="^\+255[0-9]{9}$" autocomplete="tel">
+                    <label for="phone">Phone Number (+255...)</label>
+                    <div class="invalid-feedback" id="phone-error">Please enter a valid Tanzanian phone number (e.g., +255712345678).</div>
+                    <div class="form-text text-muted mt-1">We'll send a verification code to this number.</div>
+                </div>
+
+                <!-- Submit Button for Step 1 -->
+                <button type="submit" class="btn btn-primary w-100 btn-lg btn-loading shadow-sm" id="sendOtpBtn">
+                    <span class="btn-text">
+                        <i class="fas fa-paper-plane me-2"></i>Send Verification Code
+                    </span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </form>
+
+            {# --- STEP 2: OTP & Details Form (Hidden Initially) --- #}
+            <form method="POST" action="{{ url_for('register') }}" class="auth-form needs-validation animate__animated animate__fadeIn" id="otpVerificationForm" novalidate style="display: none;">
+                {{ form.hidden_tag() if form else '' }}
+                <input type="hidden" name="otp_verified" value="true">
+                <input type="hidden" id="verifiedPhone" name="phone">
+
+                <div class="step-indicator mb-4">
+                    <div class="steps">
+                        <div class="step completed">
+                            <div class="step-icon"><i class="fas fa-check"></i></div>
+                            <div class="step-label">Phone</div>
+                        </div>
+                        <div class="step active">
+                            <div class="step-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="step-label">Verify</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+                            <div class="step-label">Account</div>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 66%" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <p class="text-center text-muted mb-3 small">Enter the code sent to <strong id="displayPhone" class="text-primary">your phone</strong> and complete your details.</p>
+
+                <!-- OTP Field -->
+                <div class="otp-input-container mb-4">
+                    <label class="form-label small text-muted text-center d-block mb-3">Verification Code</label>
+                    <div class="d-flex justify-content-center gap-2">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="0" tabindex="1">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="1" tabindex="2">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="2" tabindex="3">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="3" tabindex="4">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="4" tabindex="5">
+                        <input type="text" class="form-control form-control-lg otp-digit text-center" maxlength="1" pattern="\d" inputmode="numeric" data-otp-index="5" tabindex="6">
+                    </div>
+                    <input type="hidden" id="otp_code" name="otp_code" required pattern="\d{6}">
+                    <div class="invalid-feedback text-center d-block" id="otp-error" style="display: none;">Please enter the 6-digit code sent to your phone.</div>
+                </div>
+
+                <!-- Resend OTP Link -->
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-link text-primary small" id="resendOtpBtn" disabled>Resend Code</button>
+                    <span id="resendTimer" class="small text-muted ms-2"></span>
+                </div>
+
+                <div class="divider my-4"><span>Account Details</span></div>
+
+                <!-- Username Field -->
+                <div class="form-floating mb-3 has-icon" id="username-reg-wrapper">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9_]+$" autocomplete="username">
+                    <label for="username">Username</label>
+                    <div class="invalid-feedback" id="username-error">Username must be 3-30 characters (letters, numbers, underscore only).</div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="form-floating mb-3 has-icon" id="email-wrapper">
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Email Address" required autocomplete="email">
+                    <label for="email">Email Address</label>
+                    <div class="invalid-feedback" id="email-error">Please enter a valid email address.</div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-floating mb-3 position-relative has-icon" id="password-reg-wrapper">
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required minlength="8" autocomplete="new-password">
+                    <label for="password">Password</label>
+                    <button type="button" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="invalid-feedback" id="password-error">Password must be at least 8 characters long.</div>
+                    <div class="password-strength-container mt-1">
+                        <div class="progress password-strength-meter" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="password-strength-text small text-muted mt-1">Password strength: <span id="strength-text">None</span></div>
+                    </div>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="form-floating mb-4 position-relative has-icon" id="confirm-password-wrapper">
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirm Password" required autocomplete="new-password">
+                    <label for="confirm_password">Confirm Password</label>
+                    <button type="button" class="btn btn-link password-toggle confirm-toggle" tabindex="-1" aria-label="Show password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="invalid-feedback" id="confirm_password-error">Passwords do not match.</div>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" value="" id="terms" name="terms" required>
+                    <label class="form-check-label small text-muted" for="terms">
+                        I agree to the <a href="{{ url_for('terms') }}" target="_blank" class="text-link">Terms of Service</a> and <a href="{{ url_for('privacy') }}" target="_blank" class="text-link">Privacy Policy</a>.
+                    </label>
+                    <div class="invalid-feedback">You must agree to the terms to continue.</div>
+                </div>
+
+                <!-- Submit Button for Step 2 -->
+ 
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </form>
+
+            {# Separator and Social Login #}
+            <div class="separator my-4" id="socialSeparator"><span>OR</span></div>
+            <div class="social-login d-grid gap-2 mb-4" id="socialLoginOptions">
+                <a href="{{ url_for('google.login') }}" class="btn btn-outline-secondary social-btn google w-100" id="googleSignInBtn">
+                    <i class="fab fa-google fa-fw me-2"></i> Sign up with Google
+                </a>
+            </div>
+
+            <!-- Footer Link -->
+            <div class="auth-footer text-center mt-3">
+                <p class="mb-0 text-muted">Already have an account? <a href="{{ url_for('login') }}" class="text-link fw-medium">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page-specific styles -->
+<style>
+    /* --- Registration Page Specific Styles --- */
+    :root {
+        --auth-card-shadow: 0 5px 25px rgba(0,0,0,0.05), 0 1px 5px rgba(0,0,0,0.1);
+        --primary-gradient: linear-gradient(145deg, var(--primary-dark, #2e59d9) 0%, var(--primary-color, #4e73df) 100%);
+        --transition-base: all 0.3s ease-in-out;
+        --transition-smooth: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    
+    body {
+        background: var(--body-bg, #f7fafd);
+    }
+
+    .register-wrapper {
+        display: flex;
+        min-height: 100vh;
+        align-items: stretch;
+    }
+
+    /* Illustration Column Styling */
+    .auth-illustration {
+        flex: 1.2;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .illustration-content {
+        max-width: 550px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Decorative Shapes */
+    .auth-illustration::before, 
+    .auth-illustration::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .auth-illustration::before {
+        width: 40vw;
+        height: 40vw;
+        top: -10%;
+        right: -10%;
+    }
+    
+    .auth-illustration::after {
+        width: 30vw;
+        height: 30vw;
+        bottom: -5%;
+        left: -5%;
+    }
+    
+    @media (max-width: 991.98px) {
+        .auth-illustration { display: none; }
+    }
+
+    /* Form Container Styling */
+    .auth-form-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background-color: var(--body-bg, #f7fafd);
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 520px;
+        background: var(--white-color, #ffffff);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        border: 1px solid var(--bs-border-color-translucent, rgba(0,0,0,.07));
+        box-shadow: var(--auth-card-shadow);
+        transition: var(--transition-smooth);
+    }
+    
+    .auth-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Logo & Header Styling */
+    .auth-logo-icon { 
+        font-size: 2.8rem; 
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+    
+    .logo-link {
+        display: inline-block;
+        transition: var(--transition-base);
+    }
+    
+    .logo-link:hover {
+        transform: scale(1.05);
+    }
+    
+    .auth-title {
+        font-weight: 600;
+    }
+    
+    .auth-subtitle {
+        font-size: 0.95rem;
+    }
+
+    /* Step Indicator Styling */
+    .step-indicator {
+        position: relative;
+    }
+    
+    .step-indicator .steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .step-indicator .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    
+    .step-indicator .step-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px;
+        transition: var(--transition-base);
+    }
+    
+    .step-indicator .step.active .step-icon {
+        background-color: var(--primary-color, #4e73df);
+        color: white;
+        box-shadow: 0 3px 8px rgba(78, 115, 223, 0.25);
+    }
+    
+    .step-indicator .step.completed .step-icon {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .step-indicator .step-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+        transition: var(--transition-base);
+    }
+    
+    .step-indicator .step.active .step-label,
+    .step-indicator .step.completed .step-label {
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .step-indicator .progress {
+        height: 4px;
+        margin-top: 8px;
+        background-color: #f0f0f0;
+    }
+
+    /* OTP Input Styling */
+    .otp-input-container {
+        text-align: center;
+    }
+    
+    .otp-digit {
+        width: 48px;
+        height: 54px;
+        font-size: 1.4rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: var(--transition-base);
+    }
+    
+    .otp-digit:focus {
+        border-color: var(--primary-color, #4e73df);
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .otp-digit.filled {
+        background-color: #f8f9fa;
+    }
+
+    /* Divider Styling */
+    .divider {
+        display: flex;
+        align-items: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .divider::before {
+        margin-right: 0.75rem;
+    }
+    
+    .divider::after {
+        margin-left: 0.75rem;
+    }
+
+    /* Separator Styling */
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #6c757d;
+        opacity: 0.8;
+    }
+    
+    .separator::before,
+    .separator::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .separator span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Form Control Styling */
+    .form-floating.has-icon .form-control {
+        padding-left: 2.5rem;
+    }
+    
+    .form-floating.has-icon::before {
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        opacity: 0.6;
+        z-index: 3;
+        transition: var(--transition-base);
+        pointer-events: none;
+    }
+    
+    .form-floating.has-icon:focus-within::before {
+        color: var(--primary-color, #4e73df);
+        opacity: 1;
+    }
+    
+    .form-floating label {
+        padding-left: 2.5rem;
+    }
+    
+    /* Icon Classes */
+    #phone-wrapper::before { content: "\f095"; }
+    #username-reg-wrapper::before { content: "\f007"; }
+    #email-wrapper::before { content: "\f0e0"; }
+    #password-reg-wrapper::before { content: "\f023"; }
+    #confirm-password-wrapper::before { content: "\f023"; }
+
+    /* Password Visibility Toggle */
+    .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        border: none;
+        background: transparent;
+        z-index: 5;
+        padding: 0.25rem;
+        opacity: 0.6;
+        transition: var(--transition-base);
+    }
+    
+    .password-toggle:hover {
+        opacity: 1;
+        color: var(--primary-color, #4e73df);
+    }
+
+    /* Password Strength Meter */
+    .password-strength-container {
+        margin-top: 0.5rem;
+    }
+    
+    .password-strength-meter {
+        background-color: #e9ecef;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+    
+    .password-strength-text {
+        font-size: 0.75rem;
+        text-align: right;
+    }
+    
+    /* Social Login Buttons */
+    .social-btn {
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: var(--transition-base);
+    }
+    
+    /* Enhanced Google Button Styling */
+    .social-btn.google {
+        background-color: #ffffff;
+        border: 1px solid #4285F4;
+        color: #444;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .social-btn.google:hover:not(.disabled) {
+        background-color: #f8f9fa;
+        color: #4285F4;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    
+    .social-btn.google:active:not(.disabled) {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .social-btn.google.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .social-btn.google i {
+        color: #4285F4;
+        font-size: 1.1rem;
+    }
+    
+    .social-btn.google .google-spinner {
+        display: none;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #4285F4;
+    }
+    
+    .social-btn.google.loading {
+        pointer-events: none;
+        color: transparent;
+    }
+    
+    .social-btn.google.loading i:not(.google-spinner) {
+        visibility: hidden;
+    }
+    
+    .social-btn.google.loading .google-spinner {
+        display: inline-block;
+    }
+    
+    /* Button Loading State */
+    .btn-loading {
+        position: relative;
+    }
+    
+    .btn-loading .spinner-border {
+        display: none;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .btn-loading.loading .spinner-border {
+        display: inline-block;
+    }
+    
+    .btn-loading.loading .btn-text {
+        visibility: hidden;
+    }
+
+    /* Animation Classes */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-12px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .pulse {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .pulse-slow {
+        animation: pulse 3s ease-in-out infinite;
+    }
+    
+    .delay-1 {
+        animation-delay: 0.7s;
+    }
+    
+    .delay-2 {
+        animation-delay: 1.4s;
+    }
+
+    /* Payment Icons */
+    .payment-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .payment-icon i {
+        opacity: 0.8;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        .auth-card {
+            padding: 1.75rem;
+        }
+        
+        .otp-digit {
+            width: 40px;
+            height: 48px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+{# --- CONTENT BLOCK END --- #}
+
+
+{# --- SCRIPTS BLOCK START --- #}
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // --- DOM Element References ---
+        const phoneForm = document.getElementById('phoneVerificationForm');
+        const otpForm = document.getElementById('otpVerificationForm');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const resendOtpBtn = document.getElementById('resendOtpBtn');
+        const resendTimerSpan = document.getElementById('resendTimer');
+        const displayPhoneSpan = document.getElementById('displayPhone');
+        const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+    
+        const phoneInput = document.getElementById('phone');
+        const verifiedPhoneInput = document.getElementById('verifiedPhone');
+        const otpInput = document.getElementById('otp_code');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const termsCheckbox = document.getElementById('terms');
+    
+        const passwordStrengthBar = document.querySelector('.password-strength-meter .progress-bar');
+        const strengthText = document.getElementById('strength-text');
+        const otpDigits = document.querySelectorAll('.otp-digit');
+    
+        // --- Initial State ---
+        let resendInterval;
+        let resendCooldown = 60; // Cooldown in seconds
+    
+        // --- Helper: Manage Button Loading State ---
+        function setLoading(button, isLoading) {
+            if (!button) return;
+            if (isLoading) {
+                button.classList.add('loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+    
+        // --- Helper: Display Field Error ---
+        function displayFieldError(fieldId, message) {
+            const feedbackElement = document.getElementById(`${fieldId}-error`);
+            const inputElement = document.getElementById(fieldId);
+            if (inputElement) inputElement.classList.add('is-invalid');
+            if (feedbackElement) {
+                feedbackElement.textContent = message;
+                feedbackElement.style.display = 'block';
+            }
+        }
+    
+        // --- Helper: Clear All Field Errors ---
+        function clearAllFieldErrors() {
+            phoneForm.classList.remove('was-validated');
+            otpForm.classList.remove('was-validated');
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.style.display = 'none';
+                // Restore default message if available
+                el.textContent = el.dataset.defaultError || 'Invalid input.';
+            });
+        }
+    
+        // --- Password Visibility Toggle ---
+        document.querySelectorAll('.password-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const wrapper = this.closest('.position-relative');
+                const passwordField = wrapper.querySelector('input[type]');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    this.querySelector('i').classList.remove('fa-eye');
+                    this.querySelector('i').classList.add('fa-eye-slash');
+                } else {
+                    passwordField.type = 'password';
+                    this.querySelector('i').classList.remove('fa-eye-slash');
+                    this.querySelector('i').classList.add('fa-eye');
+                }
+            });
+        });
+    
+        // --- Password Strength Meter ---
+        if (passwordInput) {
+            passwordInput.addEventListener('input', updatePasswordStrength);
+    
+            function updatePasswordStrength() {
+                const value = passwordInput.value;
+                const strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{10,})");
+                const mediumRegex = new RegExp("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.{8,})");
+                
+                let strength = 0;
+                let strengthClass = '';
+                let strengthLabel = 'None';
+                
+                if (value.length === 0) {
+                    strength = 0;
+                    strengthClass = '';
+                    strengthLabel = 'None';
+                } else if (strongRegex.test(value)) {
+                    strength = 100;
+                    strengthClass = 'bg-success';
+                    strengthLabel = 'Strong';
+                } else if (mediumRegex.test(value)) {
+                    strength = 75;
+                    strengthClass = 'bg-warning';
+                    strengthLabel = 'Medium';
+                } else if (value.length >= 6) {
+                    strength = 30;
+                    strengthClass = 'bg-danger';
+                    strengthLabel = 'Weak';
+                } else {
+                    strength = 10;
+                    strengthClass = 'bg-danger';
+                    strengthLabel = 'Very Weak';
+                }
+                
+                passwordStrengthBar.style.width = strength + '%';
+                passwordStrengthBar.className = 'progress-bar ' + strengthClass;
+                strengthText.textContent = strengthLabel;
+                passwordStrengthBar.setAttribute('aria-valuenow', strength);
+            }
+        }
+    
+        // --- OTP Input Handling ---
+        if (otpDigits.length > 0) {
+            // Setup OTP input fields
+            otpDigits.forEach((digit, index) => {
+                digit.addEventListener('keydown', function(e) {
+                    // Allow only numbers, backspace, delete, arrows
+                    if (e.key === 'Backspace' || e.key === 'Delete' || 
+                        e.key === 'Tab' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
+                        /^[0-9]$/.test(e.key)) {
+                        // Valid key
+                    } else {
+                        e.preventDefault();
+                    }
+    
+                    // Jump to previous field on backspace with empty field
+                    if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                        otpDigits[index - 1].focus();
+                    }
+                });
+    
+                digit.addEventListener('input', function(e) {
+                    if (this.value.length > 0) {
+                        this.classList.add('filled');
+                        
+                        // Automatically move to the next input
+                        if (index < otpDigits.length - 1) {
+                            otpDigits[index + 1].focus();
+                        }
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                    
+                    // Update hidden field with complete OTP
+                    updateOtpValue();
+                });
+    
+                // Prevent paste multiple characters into a single field
+                digit.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text');
+                    
+                    // If pasting a 6-digit code
+                    if (/^\d{6}$/.test(paste)) {
+                        // Distribute the digits
+                        for (let i = 0; i < Math.min(paste.length, otpDigits.length); i++) {
+                            otpDigits[i].value = paste[i];
+                            otpDigits[i].classList.add('filled');
+                        }
+                        updateOtpValue();
+                    }
+                });
+            });
+    
+            // Update the hidden OTP input with combined value
+            function updateOtpValue() {
+                const otp = Array.from(otpDigits).map(digit => digit.value).join('');
+                otpInput.value = otp;
+                
+                // Show/hide error based on completion
+                const otpError = document.getElementById('otp-error');
+                if (otp.length === 6) {
+                    otpError.style.display = 'none';
+                }
+            }
+        }
+    
+        // --- Password Confirmation Validation ---
+        if (confirmPasswordInput && passwordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                if (this.value !== passwordInput.value) {
+                    this.setCustomValidity('Passwords do not match');
+                    displayFieldError('confirm_password', 'Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                    document.getElementById('confirm_password-error').style.display = 'none';
+                }
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                if (confirmPasswordInput.value && this.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity('Passwords do not match');
+                    displayFieldError('confirm_password', 'Passwords do not match');
+                } else if (confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity('');
+                    confirmPasswordInput.classList.remove('is-invalid');
+                    document.getElementById('confirm_password-error').style.display = 'none';
+                }
+            });
+        }
+    
+        // --- Form Validation ---
+        function validateForm(form) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                form.classList.add('was-validated');
+                return false;
+            }
+            return true;
+        }
+    
+        // --- Phone Form Submit ---
+        if (phoneForm) {
+            phoneForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                clearAllFieldErrors();
+                
+                if (validateForm(this)) {
+                    // Phone validation for Tanzania
+                    const phoneNumber = phoneInput.value.trim();
+                    if (!/^\+255[0-9]{9}$/.test(phoneNumber)) {
+                        displayFieldError('phone', 'Please enter a valid Tanzanian phone number (e.g., +255712345678)');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    setLoading(sendOtpBtn, true);
+                    
+                    // Simulate API call to send OTP (replace with actual API call)
+                    setTimeout(() => {
+                        // On success
+                        verifiedPhoneInput.value = phoneNumber;
+                        displayPhoneSpan.textContent = phoneNumber;
+                        
+                        // Switch to OTP form
+                        phoneForm.style.display = 'none';
+                        otpForm.style.display = 'block';
+                        
+                        // Focus first OTP digit
+                        if (otpDigits.length > 0) otpDigits[0].focus();
+                        
+                        // Start resend timer
+                        startResendTimer();
+                        
+                        // Hide social login options during OTP verification
+                        document.getElementById('socialSeparator').style.display = 'none';
+                        document.getElementById('socialLoginOptions').style.display = 'none';
+                        
+                        setLoading(sendOtpBtn, false);
+                    }, 1500);
+                }
+            });
+        }
+    
+        // --- OTP Form Submit ---
+        if (otpForm) {
+            otpForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                clearAllFieldErrors();
+                
+                // Validate OTP
+                const otp = otpInput.value;
+                if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+                    document.getElementById('otp-error').style.display = 'block';
+                    return;
+                }
+                
+                if (validateForm(this)) {
+                    // Show loading state
+                    setLoading(registerBtn, true);
+                    
+                    // Simulate API call for registration (replace with actual API call)
+                    setTimeout(() => {
+                        // Redirect on success (or handle response)
+                        window.location.href = '/dashboard';
+                        
+                        // In case redirect doesn't happen immediately
+                        setLoading(registerBtn, false);
+                    }, 2000);
+                }
+            });
+        }
+    
+        // --- Resend OTP Timer ---
+        function startResendTimer() {
+            // Clear any existing interval
+            if (resendInterval) clearInterval(resendInterval);
+            
+            resendOtpBtn.disabled = true;
+            resendCooldown = 60; // Reset to initial value
+            updateResendTimer();
+            
+            // Update timer every second
+            resendInterval = setInterval(() => {
+                resendCooldown--;
+                updateResendTimer();
+                
+                if (resendCooldown <= 0) {
+                    clearInterval(resendInterval);
+                    resendOtpBtn.disabled = false;
+                    resendTimerSpan.textContent = '';
+                }
+            }, 1000);
+        }
+        
+        function updateResendTimer() {
+            resendTimerSpan.textContent = `(${resendCooldown}s)`;
+        }
+    
+        // --- Resend OTP Button Click ---
+        if (resendOtpBtn) {
+            resendOtpBtn.addEventListener('click', function() {
+                if (this.disabled) return;
+                
+                // Get phone number from hidden input
+                const phoneNumber = verifiedPhoneInput.value;
+                
+                // Show loading state temporarily
+                const originalText = this.textContent;
+                this.textContent = 'Sending...';
+                this.disabled = true;
+                
+                // Simulate API call to resend OTP (replace with actual API call)
+                setTimeout(() => {
+                    // Reset button text and start timer
+                    this.textContent = originalText;
+                    startResendTimer();
+                    
+                    // Show success toast or feedback
+                    // This would be a good place to add a toast notification
+                    alert('A new verification code has been sent');
+                }, 1500);
+            });
+        }
+    
+        // --- Google Sign Up Button ---
+        if (googleSignUpBtn && !googleSignUpBtn.classList.contains('disabled')) {
+            googleSignUpBtn.addEventListener('click', function(e) {
+                // Only handle if not disabled
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Add loading state
+                this.classList.add('loading');
+                
+                // OAuth redirect will happen automatically if not prevented
+            });
+        }
+    
+        // --- Username Availability Check ---
+        if (usernameInput) {
+            let usernameCheckTimeout;
+            
+            usernameInput.addEventListener('input', function() {
+                clearTimeout(usernameCheckTimeout);
+                
+                // Only check if username meets minimum requirements
+                if (this.value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(this.value)) {
+                    usernameCheckTimeout = setTimeout(() => {
+                        // Simulate API call to check username availability
+                        checkUsernameAvailability(this.value);
+                    }, 500);
+                }
+            });
+            
+            function checkUsernameAvailability(username) {
+                // Replace with actual API call
+                const isAvailable = Math.random() > 0.3; // Simulate 70% chance of availability
+                
+                if (!isAvailable) {
+                    displayFieldError('username', 'This username is already taken');
+                } else {
+                    usernameInput.classList.remove('is-invalid');
+                    document.getElementById('username-error').style.display = 'none';
+                }
+            }
+        }
+    
+        // --- Email Availability Check ---
+        if (emailInput) {
+            let emailCheckTimeout;
+            
+            emailInput.addEventListener('input', function() {
+                clearTimeout(emailCheckTimeout);
+                
+                // Only check if email appears valid
+                if (this.value.includes('@') && this.value.includes('.')) {
+                    emailCheckTimeout = setTimeout(() => {
+                        // Simulate API call to check email availability
+                        checkEmailAvailability(this.value);
+                    }, 500);
+                }
+            });
+            
+            function checkEmailAvailability(email) {
+                // Replace with actual API call
+                const isAvailable = Math.random() > 0.2; // Simulate 80% chance of availability
+                
+                if (!isAvailable) {
+                    displayFieldError('email', 'This email is already registered');
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                    document.getElementById('email-error').style.display = 'none';
+                }
+            }
+        }
+    
+        // --- Form Field Animation Effects ---
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.closest('.form-floating').classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.closest('.form-floating').classList.remove('focused');
+            });
+        });
+    
+        // --- Custom Form Validation Styles ---
+        document.querySelectorAll('.needs-validation').forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    
+        // --- Initialize UI Based on Form State ---
+        // Could be extended to handle server-side validation errors, etc.
+    });
+</script>
+{% endblock %}
+{# --- SCRIPTS BLOCK END --- #}

@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block title %}Money Trend{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Money Trend</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="moneyTrendChart"></canvas>
+        </div>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-link mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get the canvas context
+    const ctx = document.getElementById('moneyTrendChart').getContext('2d');
+
+    // Initialize variables with fallback values
+    let labels = ['No Data'];
+    let data = [0];
+
+    // Safely assign the labels and data from Flask to JavaScript
+    try {
+        const tempLabels = JSON.parse('{{ labels | tojson | safe }}');
+        const tempData = JSON.parse('{{ data | tojson | safe }}');
+
+        // Validate the data
+        if (Array.isArray(tempLabels) && tempLabels.length > 0) {
+            labels = tempLabels;
+        }
+        if (Array.isArray(tempData) && tempData.length > 0 && tempData.every(item => typeof item === 'number')) {
+            data = tempData;
+        }
+    } catch (e) {
+        console.error('Error parsing labels or data:', e);
+        // Fallback values are already set above
+    }
+
+    // Create the pie chart using Chart.js
+    const moneyTrendChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Transaction Amounts (TZS)',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(199, 199, 199, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Transaction Trends by Category'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

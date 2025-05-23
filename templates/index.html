@@ -1,0 +1,686 @@
+{% extends "layout.html" %}
+{% block title %}Home - PayMe Tanzania: Fast & Secure Payments{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="hero" class="hero-section container-fluid py-5 overflow-hidden">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-content text-center text-lg-start">
+                    <h1 class="display-3 fw-bolder mb-3 animate__animated animate__fadeInDown">
+                        <span class="gradient-text">Welcome to PayMe Tanzania</span>
+                    </h1>
+                    <p class="lead mb-4 animate__animated animate__fadeIn animate__delay-05s">
+                        The simplest, fastest, and most secure way to send and receive money across Tanzania.
+                    </p>
+
+                    <div class="payment-methods my-4 animate__animated animate__fadeIn animate__delay-1s">
+                        <h6 class="mb-3 text-muted fw-normal">Supports All Major Payment Methods:</h6>
+                        <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2 mb-4">
+                            <!-- Using more descriptive names and consistent icons -->
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/halopesa-logo.png') }}" alt="HaloPesa" class="payment-icon"> HaloPesa
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/yas-logo.png') }}" alt="MIxx By Yas" class="payment-icon"> MIxx By Yas
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/airtelmoney-logo.png') }}" alt="Airtel Money" class="payment-icon"> Airtel Money
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/mpesa-logo.png') }}" alt="M-Pesa" class="payment-icon"> M-Pesa
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/crdb-logo.png') }}" alt="CRDB Bank" class="payment-icon"> CRDB Bank
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/nmb-logo.png') }}" alt="NMB Bank" class="payment-icon"> NMB Bank
+                            </span>
+                            <span class="payment-badge">
+                                <img src="{{ url_for('static', filename='icons/equity-logo.png') }}" alt="EQUITY Bank" class="payment-icon"> EQUITY Bank
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="cta-buttons mt-4 animate__animated animate__fadeInUp animate__delay-15s">
+                        {% if 'user_id' not in session %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-lg-3 mb-2 mb-lg-0 px-4 py-3 shadow-sm">
+                            <i class="fas fa-user-plus me-2"></i>Get Started Free
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4 py-3 shadow-sm">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-success btn-lg px-4 py-3 shadow-sm">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-wrapper position-relative animate__animated animate__fadeInRight animate__delay-05s">
+                    <!-- Image with Loader -->
+                    <div class="hero-image-container rounded-4 shadow-lg overflow-hidden">
+                        <img src="{{ url_for('static', filename='icons/payme-illustration.jpg') }}"
+                             alt="PayMe Tanzania Mobile App Illustration"
+                             class="img-fluid hero-image"
+                             id="heroImage"
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/600x450/dee2e6/6c757d.png?text=PayMe+Illustration'; document.getElementById('imageLoader').style.display='none';"
+                             loading="lazy">
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-light" id="imageLoader">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative element -->
+                    <div class="hero-decor-blob"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Why Choose PayMe?</h2>
+            <p class="lead text-muted">Experience seamless transactions with our powerful features.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card text-center p-4 p-lg-5 rounded-4 shadow-sm h-100 w-100">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <i class="fas fa-bolt fs-2"></i>
+                    </div>
+                    <h3 class="h5 fw-semibold mb-3">Instant Transfers</h3>
+                    <p class="mb-0 text-muted">Send and receive money in seconds, anytime, anywhere. No more waiting!</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card text-center p-4 p-lg-5 rounded-4 shadow-sm h-100 w-100">
+                    <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <i class="fas fa-shield-alt fs-2"></i>
+                    </div>
+                    <h3 class="h5 fw-semibold mb-3">Bank-Level Security</h3>
+                    <p class="mb-0 text-muted">Your transactions and personal data are protected with state-of-the-art encryption.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card text-center p-4 p-lg-5 rounded-4 shadow-sm h-100 w-100">
+                    <div class="feature-icon bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <i class="fas fa-tags fs-2"></i> {/* Changed icon for better relevance */}
+                    </div>
+                    <h3 class="h5 fw-semibold mb-3">Competitive Fees</h3>
+                    <p class="mb-0 text-muted">Enjoy some of the most affordable transaction rates in the Tanzanian market.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="testimonials-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Trusted by Tanzanians</h2>
+            <p class="lead text-muted">See what our happy customers are saying about PayMe.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="testimonial-card p-4 rounded-4 bg-white shadow-sm h-100 w-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='images/avatar-1.jpg') }}" alt="John M." class="testimonial-avatar rounded-circle me-3 shadow-sm">
+                        <div>
+                            <h5 class="mb-0 fw-semibold">John M.</h5>
+                            <p class="text-muted small mb-1">Small Business Owner</p>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-quote fst-italic text-muted">"PayMe has revolutionized how I send money to my family upcountry. It's incredibly fast, and the fees are significantly lower than other services I've used."</p>
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="testimonial-card p-4 rounded-4 bg-white shadow-sm h-100 w-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='images/avatar-2.jpg') }}" alt="Sarah K." class="testimonial-avatar rounded-circle me-3 shadow-sm">
+                        <div>
+                            <h5 class="mb-0 fw-semibold">Asha K.</h5> {/* Changed name for diversity */}
+                            <p class="text-muted small mb-1">Online Merchant</p>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-quote fst-italic text-muted">"As an online seller, PayMe is essential. Supporting multiple payment methods like M-Pesa and Airtel Money means I never miss a sale. It's reliable and easy!"</p>
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="testimonial-card p-4 rounded-4 bg-white shadow-sm h-100 w-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='images/avatar-3.jpg') }}" alt="David T." class="testimonial-avatar rounded-circle me-3 shadow-sm">
+                        <div>
+                            <h5 class="mb-0 fw-semibold">David T.</h5>
+                            <p class="text-muted small mb-1">Freelancer</p>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-quote fst-italic text-muted">"The platform's security gives me complete peace of mind, especially when receiving payments from clients. Smooth interface and top-notch support. Highly recommended!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section id="cta" class="cta-section text-white py-5">
+    <div class="cta-background"></div> {/* For gradient overlay */}
+    <div class="container text-center position-relative">
+        <i class="fas fa-rocket fa-3x text-white mb-4 animate__animated animate__pulse animate__infinite"></i>
+        <h2 class="display-5 fw-bold mb-3">Ready to Simplify Your Payments?</h2>
+        <p class="lead mb-4 mx-auto" style="max-width: 600px;">Join thousands of satisfied users enjoying effortless money transfers with PayMe Tanzania.</p>
+        {% if 'user_id' not in session %}
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5 py-3 shadow fw-bold cta-button">
+            <i class="fas fa-user-plus me-2"></i>Create Your Free Account Now
+        </a>
+        {% else %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg px-5 py-3 shadow fw-bold cta-button">
+            <i class="fas fa-arrow-right me-2"></i>Go to Your Dashboard
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Dependencies (Ensure these are loaded, ideally in layout.html base template) -->
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- Animate.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<!-- Bootstrap CSS (assuming v5.3+) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<!-- Custom JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Hero Image Loading ---
+        const heroImage = document.getElementById('heroImage');
+        const imageLoader = document.getElementById('imageLoader');
+
+        const hideLoader = () => {
+            if (imageLoader) {
+                imageLoader.style.opacity = '0';
+                 // Use transition end to set display none after fade out
+                 imageLoader.addEventListener('transitionend', () => {
+                     imageLoader.style.display = 'none';
+                 }, { once: true }); // Ensure listener runs only once
+            }
+        };
+
+        if (heroImage) {
+            if (heroImage.complete) {
+                // Image already loaded/cached
+                hideLoader();
+            } else {
+                // Image still loading
+                heroImage.onload = hideLoader;
+                // Fallback if error logic is needed (onerror attribute handles basic case)
+                heroImage.onerror = () => {
+                    console.error("Hero image failed to load. Fallback applied via onerror attribute.");
+                    hideLoader(); // Still hide loader even if fallback shows
+                };
+            }
+        } else {
+            // If heroImage element doesn't exist, hide loader immediately
+             hideLoader();
+        }
+
+        // --- Smooth Scrolling for Anchor Links ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start' // Align top of target element to top of viewport
+                    });
+                }
+            });
+        });
+
+        // --- Animate Elements on Scroll (using Intersection Observer for better performance) ---
+        const animatedElements = document.querySelectorAll('.feature-card, .testimonial-card');
+
+        if ("IntersectionObserver" in window) {
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                        entry.target.style.setProperty('--animate-duration', '0.8s'); // Customize duration
+                        observer.unobserve(entry.target); // Stop observing once animated
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            animatedElements.forEach(el => observer.observe(el));
+        } else {
+            // Fallback for older browsers (less performant)
+            const animateOnScroll = () => {
+                animatedElements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const screenPosition = window.innerHeight / 1.2; // Adjust trigger point
+
+                    if (elementPosition < screenPosition && !element.classList.contains('animate__fadeInUp')) {
+                         element.classList.add('animate__animated', 'animate__fadeInUp');
+                         element.style.setProperty('--animate-duration', '0.8s');
+                    }
+                });
+            };
+            window.addEventListener('scroll', animateOnScroll);
+            animateOnScroll(); // Initial check
+        }
+
+        // --- Interactive Payment Badges (Example - Can be expanded) ---
+        const paymentBadges = document.querySelectorAll('.payment-badge');
+        paymentBadges.forEach(badge => {
+             badge.addEventListener('mouseenter', () => badge.classList.add('hovered'));
+             badge.addEventListener('mouseleave', () => badge.classList.remove('hovered'));
+        });
+
+    });
+</script>
+
+<!-- Custom CSS (Scoped for better organization) -->
+<style>
+    /* --- Root Variables & Base Styles --- */
+    :root {
+        --primary-color: #4e73df; /* Existing primary */
+        --primary-dark: #2e59d9;
+        --primary-light: #85a0ef;
+        --secondary-color: #1cc88a; /* Existing success */
+        --secondary-dark: #17a673;
+        --warning-color: #f6c23e; /* Existing warning */
+        --danger-color: #e74a3b; /* Existing danger */
+        --info-color: #36b9cc;   /* Existing info */
+        --dark-color: #5a5c69;
+        --gray-light: #f8f9fc;
+        --gray-medium: #dee2e6;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --border-radius-sm: 0.25rem; /* 4px */
+        --border-radius-md: 0.5rem;  /* 8px */
+        --border-radius-lg: 1rem;   /* 16px */
+        --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+        --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
+        --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+        --transition-base: all 0.3s ease-in-out;
+        --font-sans-serif: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-sans-serif);
+        color: var(--text-dark);
+        line-height: 1.6;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600; /* Slightly bolder headings */
+        color: var(--dark-color);
+    }
+
+    .lead {
+        font-weight: 400;
+        font-size: 1.15rem; /* Slightly larger lead text */
+    }
+
+    /* --- Reusable Components & Utilities --- */
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -10px;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-light), var(--primary-color));
+        border-radius: 2px;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent; /* Standard property */
+    }
+
+    .btn {
+        transition: var(--transition-base);
+        border-radius: var(--border-radius-md); /* Consistent button radius */
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 1.5rem; /* Slightly larger padding */
+    }
+
+    .btn-lg {
+         padding: 0.9rem 1.8rem; /* Even larger for large buttons */
+         font-size: 1rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        border-width: 2px;
+    }
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 115, 223, 0.2);
+    }
+
+    .btn-success { /* For logged-in dashboard button */
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+     .btn-success:hover {
+        background-color: var(--secondary-dark);
+        border-color: var(--secondary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+     }
+
+    /* --- Hero Section Specific Styles --- */
+    .hero-section {
+        background-color: #f1f5fe; /* Lighter blue background */
+        position: relative;
+         padding-bottom: 8rem !important; /* Extra space for overlap */
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-content h1 {
+         line-height: 1.2;
+    }
+
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: white;
+        border: 1px solid var(--gray-medium);
+        color: var(--text-muted);
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px; /* Pill shape */
+        font-size: 0.85rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition-base);
+        cursor: default; /* Indicate they are not clickable unless functionality added */
+    }
+
+    .payment-badge:hover, .payment-badge.hovered {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-light);
+        color: var(--primary-dark);
+    }
+
+    .payment-icon {
+        height: 20px; /* Consistent icon size */
+        width: auto;
+        margin-right: 8px;
+        object-fit: contain;
+    }
+
+    .hero-image-wrapper {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-image-container {
+         position: relative; /* Needed for loader positioning */
+         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+    }
+
+    .hero-image-container:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .hero-image {
+        display: block; /* Remove potential bottom space */
+        max-width: 100%;
+        height: auto;
+    }
+
+    #imageLoader {
+        background: rgba(255, 255, 255, 0.8); /* Semi-transparent loader background */
+        backdrop-filter: blur(4px);
+        transition: opacity 0.5s ease-out; /* Smooth fade out */
+    }
+
+    .hero-decor-blob { /* Subtle decorative element */
+        position: absolute;
+        bottom: -40px; /* Overlap below */
+        right: -30px;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+        opacity: 0.15;
+        border-radius: 50% 70% 60% 40% / 60% 40% 70% 50%; /* Blob shape */
+        z-index: 0;
+        animation: blobMorph 15s infinite ease-in-out;
+    }
+
+    @keyframes blobMorph {
+        0%, 100% { border-radius: 50% 70% 60% 40% / 60% 40% 70% 50%; }
+        25% { border-radius: 40% 60% 50% 70% / 70% 50% 60% 40%; transform: rotate(5deg) scale(1.05); }
+        50% { border-radius: 70% 50% 40% 60% / 50% 70% 40% 60%; transform: rotate(-5deg) scale(1); }
+        75% { border-radius: 60% 40% 70% 50% / 40% 60% 50% 70%; transform: rotate(0deg) scale(1.03); }
+    }
+
+    /* --- Features Section Styles --- */
+    .features-section {
+        background-color: var(--gray-light);
+        border-top: 1px solid var(--gray-medium);
+        border-bottom: 1px solid var(--gray-medium);
+    }
+
+    .feature-card {
+        background-color: #fff;
+        transition: var(--transition-base);
+        border: 1px solid transparent; /* Placeholder for hover effect */
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-light);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Testimonials Section Styles --- */
+    .testimonials-section {
+        background-color: #fff; /* White background */
+         position: relative;
+         overflow: hidden;
+    }
+    /* Add subtle background pattern */
+    .testimonials-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23e9ecef' fill-opacity='0.4'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+        z-index: 0;
+    }
+    .testimonials-section .container {
+        position: relative; /* Ensure content is above pattern */
+        z-index: 1;
+    }
+
+    .testimonial-card {
+        border-left: 5px solid var(--primary-color);
+        transition: var(--transition-base);
+        background-color: #fff; /* Ensure white background */
+        position: relative; /* Needed for potential pseudo-elements */
+         padding-bottom: 2.5rem; /* Space for quote icon */
+    }
+
+    .testimonial-card::after { /* Decorative quote icon */
+         content: '\f10d'; /* Font Awesome quote-left */
+         font-family: 'Font Awesome 6 Free';
+         font-weight: 900;
+         position: absolute;
+         bottom: 1rem;
+         right: 1.5rem;
+         font-size: 2rem;
+         color: var(--primary-light);
+         opacity: 0.3;
+         transition: opacity 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: var(--shadow-md);
+        border-left-color: var(--primary-dark);
+    }
+     .testimonial-card:hover::after {
+         opacity: 0.5;
+     }
+
+    .testimonial-avatar {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border: 3px solid white;
+    }
+
+    .testimonial-quote {
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    /* --- CTA Section Styles --- */
+    .cta-section {
+        position: relative;
+        overflow: hidden; /* Contain pseudo-elements */
+        color: white; /* Default text color */
+    }
+
+    .cta-background { /* Gradient overlay */
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        z-index: 0;
+        /* Optional: Add subtle pattern */
+        /* background-image: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%), url('pattern.png'); */
+        /* background-blend-mode: overlay; */
+    }
+
+    .cta-section .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-button {
+        background-color: white;
+        color: var(--primary-dark);
+        transition: var(--transition-base), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Added bouncy transform transition */
+    }
+
+    .cta-button:hover {
+        background-color: var(--gray-light);
+        color: var(--primary-color);
+        transform: scale(1.05); /* Bouncy effect */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 991.98px) {
+        .hero-content h1 {
+            font-size: 2.5rem; /* Adjust heading size */
+        }
+        .hero-content {
+            margin-bottom: 3rem;
+        }
+        .hero-image-wrapper {
+            margin-top: 2rem;
+        }
+         .payment-methods .gap-2 { /* Ensure badges wrap nicely on mobile */
+             gap: 0.5rem !important;
+         }
+         .feature-card {
+             padding: 1.5rem !important;
+         }
+    }
+
+    @media (max-width: 767.98px) {
+         .hero-content h1 {
+             font-size: 2.1rem;
+         }
+         .lead {
+             font-size: 1rem;
+         }
+         .cta-buttons .btn {
+             width: 100%; /* Full width buttons on small screens */
+             margin-bottom: 1rem;
+         }
+         .cta-buttons .btn:last-child {
+              margin-bottom: 0;
+         }
+         .section-title::after {
+              width: 50px;
+              height: 3px;
+         }
+         .feature-card {
+             text-align: center; /* Ensure text is centered on mobile */
+         }
+         .testimonial-card {
+             margin-bottom: 1.5rem; /* Add space between cards on mobile */
+         }
+    }
+
+</style>
+{% endblock %}

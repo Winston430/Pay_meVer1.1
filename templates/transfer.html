@@ -1,0 +1,368 @@
+{% extends "layout.html" %}
+{% block title %}Transfer Funds - PayMe Tanzania{% endblock %}
+
+{# --- CONTENT BLOCK START --- #}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg border-0 animate__animated animate__fadeInUp">
+                <div class="card-header bg-primary text-white border-0 pt-3 pb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h4 mb-0 fw-bold"><i class="fas fa-exchange-alt me-2"></i> Transfer Between Accounts</h1>
+                        <div class="total-balance-badge badge bg-light text-primary rounded-pill px-3 py-2 shadow-sm">
+                             <small class="fw-normal me-1">Total Available:</small>
+                             <strong id="totalBalanceDisplay" class="fw-bold">
+                                {{ total_balance|default(0)|format_currency('TZS', locale='sw_TZ') }}
+                             </strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    {# Flash messages can be handled by the global JS notifier,
+                       but keep this section if you specifically want inline messages here too.
+                       Otherwise, remove this {% with %} block.
+                    #}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages-container mb-4">
+                                {% for category, message in messages %}
+                                     {% set alert_class = category if category in ['success', 'danger', 'warning', 'info'] else 'info' %}
+                                    <div class="alert alert-{{ alert_class }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {# Use WTForms form object if available for easier rendering/validation #}
+                    <form method="POST" action="{{ url_for('transfer') }}" id="transferForm" class="needs-validation" novalidate>
+                        {# CSRF Token #}
+                        {{ form.hidden_tag() if form else '' }}
+                        {# If not using WTForms, ensure CSRF token is included manually if needed #}
+                        {# {% if not form and config.get('WTF_CSRF_ENABLED', False) %}
+                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% endif %} #}
+
+                        <!-- From Account -->
+                        <div class="mb-3">
+                            <label for="from_account" class="form-label fw-medium">From Account:</label>
+                            <select id="from_account" name="from_account" class="form-select form-select-lg" required aria-describedby="fromAccountHelp">
+                                <option value="" disabled selected>Select source account...</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}"
+                                        data-balance="{{ method.balance|default(0) }}"
+                                        data-provider="{{ method.provider }}"
+                                        data-number="****{{ method.account_number[-4:] }}"
+                                        {% if method.is_default %}selected{% endif %}>
+                                    {{ method.account_name }} ({{ method.provider }} - ****{{ method.account_number[-4:] }})
+                                    {% if method.is_default %}- Default{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select the account to transfer from.</div>
+                            <div id="fromAccountHelp" class="form-text mt-2">
+                                Available Balance: <strong id="availableBalanceDisplay" class="text-success">Select account</strong>
+                            </div>
+                        </div>
+
+                        <!-- To Account -->
+                        <div class="mb-3">
+                             <label for="to_account" class="form-label fw-medium">To Account:</label>
+                            <select id="to_account" name="to_account" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select destination account...</option>
+                                 {# Options populated dynamically by JS or duplicated from above initially #}
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}"
+                                        data-provider="{{ method.provider }}"
+                                        data-number="****{{ method.account_number[-4:] }}">
+                                    {{ method.account_name }} ({{ method.provider }} - ****{{ method.account_number[-4:] }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select the account to transfer to.</div>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label for="amount" class="form-label fw-medium">Amount to Transfer:</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">TZS</span>
+                                <input type="number" id="amount" name="amount" min="100" step="any" {# Allow decimals? Use step="0.01" or "any" #}
+                                       class="form-control border-start-0" required placeholder="0.00">
+                                <div class="invalid-feedback">Please enter a valid amount (minimum 100 TZS).</div>
+                            </div>
+                            {# Consider adding max based on selected account's balance via JS #}
+                             <div id="amountHelp" class="form-text mt-1 text-danger" style="display: none;">Insufficient funds in selected account.</div>
+                        </div>
+
+                        <!-- Reference -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-medium">Description / Reference <span class="text-muted small">(Optional)</span></label>
+                            <input type="text" id="description" name="description" class="form-control"
+                                   placeholder="e.g., Monthly Savings, Rent Payment">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg btn-loading" id="submitBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-exchange-alt me-2"></i>Confirm Transfer
+                                </span>
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div> {# End card-body #}
+            </div> {# End card #}
+        </div> {# End col #}
+    </div> {# End row #}
+</div> {# End container #}
+{% endblock %}
+{# --- CONTENT BLOCK END --- #}
+
+
+{# --- SCRIPTS BLOCK START --- #}
+{% block scripts %}
+{{ super() }} {# Optional: Include scripts from layout block #}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- DOM Elements ---
+    const transferForm = document.getElementById('transferForm');
+    const fromAccountSelect = document.getElementById('from_account');
+    const toAccountSelect = document.getElementById('to_account');
+    const amountInput = document.getElementById('amount');
+    const availableBalanceDisplay = document.getElementById('availableBalanceDisplay');
+    const amountHelpText = document.getElementById('amountHelp');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // --- Initial State ---
+    let currentFromAccountBalance = 0;
+
+    // --- Helper: Format Currency ---
+    const tzsFormatter = new Intl.NumberFormat('sw-TZ', {
+        style: 'currency', currency: 'TZS',
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+
+    // --- Helper: Manage Button Loading State ---
+    function setLoading(button, isLoading) {
+        if (!button) return;
+        if (isLoading) {
+            button.classList.add('loading');
+            button.disabled = true;
+        } else {
+            button.classList.remove('loading');
+            button.disabled = false;
+        }
+    }
+
+    // --- Helper: Display Field Error (for specific JS validation) ---
+     function displayFieldError(inputElement, message) {
+        inputElement.classList.add('is-invalid');
+        const feedbackElement = inputElement.closest('.mb-3').querySelector('.invalid-feedback');
+        if(feedbackElement) {
+            feedbackElement.textContent = message;
+            feedbackElement.style.display = 'block'; // Ensure visible if hidden by default
+        }
+         // Also show general help text if needed
+        if (inputElement === amountInput && amountHelpText) {
+            amountHelpText.textContent = message;
+            amountHelpText.style.display = 'block';
+        }
+    }
+
+    // --- Helper: Clear All Field Errors ---
+    function clearAllFieldErrors() {
+        transferForm.classList.remove('was-validated');
+        transferForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        transferForm.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+        if(amountHelpText) amountHelpText.style.display = 'none';
+    }
+
+    // --- Update Available Balance Display & Max Amount ---
+    function updateAvailableBalance() {
+        const selectedOption = fromAccountSelect.options[fromAccountSelect.selectedIndex];
+        if (!selectedOption || selectedOption.value === "") {
+            availableBalanceDisplay.textContent = 'Select account';
+            amountInput.removeAttribute('max');
+            currentFromAccountBalance = 0;
+            return;
+        }
+
+        currentFromAccountBalance = parseFloat(selectedOption.getAttribute('data-balance') || '0');
+        availableBalanceDisplay.textContent = tzsFormatter.format(currentFromAccountBalance);
+        amountInput.max = currentFromAccountBalance; // Set max attribute for browser validation
+
+        // Re-validate amount field if it already has a value
+        validateAmount();
+    }
+
+     // --- Prevent Selecting Same Account ---
+    function filterAccountOptions() {
+        const fromValue = fromAccountSelect.value;
+        const toValue = toAccountSelect.value;
+
+        // Filter 'To' account options based on 'From' selection
+        Array.from(toAccountSelect.options).forEach(option => {
+            option.disabled = (option.value !== "" && option.value === fromValue);
+            option.style.display = option.disabled ? 'none' : '';
+        });
+         // If current 'To' selection becomes disabled, reset it
+        if (toAccountSelect.options[toAccountSelect.selectedIndex]?.disabled) {
+            toAccountSelect.value = "";
+        }
+
+        // Filter 'From' account options based on 'To' selection
+         Array.from(fromAccountSelect.options).forEach(option => {
+            option.disabled = (option.value !== "" && option.value === toValue);
+             option.style.display = option.disabled ? 'none' : '';
+        });
+         // If current 'From' selection becomes disabled, reset it and update balance
+        if (fromAccountSelect.options[fromAccountSelect.selectedIndex]?.disabled) {
+            fromAccountSelect.value = "";
+            updateAvailableBalance();
+        }
+    }
+
+    // --- Validate Amount against Balance ---
+    function validateAmount() {
+        const amountValue = parseFloat(amountInput.value);
+        if (isNaN(amountValue) || amountValue <= 0) {
+            amountInput.classList.remove('is-invalid');
+            if(amountHelpText) amountHelpText.style.display = 'none';
+            return true; // Let 'required' handle empty
+        }
+        if (amountValue > currentFromAccountBalance) {
+            amountInput.classList.add('is-invalid');
+             if(amountHelpText) {
+                amountHelpText.textContent = `Insufficient funds. Available: ${tzsFormatter.format(currentFromAccountBalance)}`;
+                amountHelpText.style.display = 'block';
+            }
+            return false;
+        } else {
+            amountInput.classList.remove('is-invalid');
+            if(amountHelpText) amountHelpText.style.display = 'none';
+            return true;
+        }
+    }
+
+    // --- Event Listeners ---
+    if (fromAccountSelect) {
+        fromAccountSelect.addEventListener('change', () => {
+             updateAvailableBalance();
+             filterAccountOptions();
+        });
+         // Initial call if an account is pre-selected
+        if (fromAccountSelect.value) updateAvailableBalance();
+    }
+     if (toAccountSelect) {
+        toAccountSelect.addEventListener('change', filterAccountOptions);
+    }
+     if (amountInput) {
+        amountInput.addEventListener('input', validateAmount);
+    }
+
+     // Initial filter on page load
+     filterAccountOptions();
+
+
+    // --- Form Submission (AJAX) ---
+    if (transferForm && submitBtn) {
+        transferForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Stop default submission ALWAYS
+            event.stopPropagation();
+            clearAllFieldErrors(); // Clear previous errors
+
+            // --- Perform All Validations Before Sending ---
+            const isAmountValid = validateAmount();
+             // Prevent same account selection again before submit
+             if (fromAccountSelect.value && fromAccountSelect.value === toAccountSelect.value) {
+                 displayFieldError(toAccountSelect, 'Cannot transfer to the same account.');
+                 transferForm.classList.add('was-validated'); // Trigger Bootstrap styles
+                 showNotification('Please select different source and destination accounts.', 'warning');
+                 return; // Stop submission
+             }
+            if (!transferForm.checkValidity() || !isAmountValid) {
+                transferForm.classList.add('was-validated'); // Show Bootstrap validation styles
+                showNotification('Please fix the errors in the form.', 'warning');
+                // Focus first invalid field (optional)
+                transferForm.querySelector(':invalid')?.focus();
+                return; // Stop if invalid
+            }
+
+            // --- If Valid, Proceed with AJAX ---
+            setLoading(submitBtn, true);
+            const formData = new FormData(transferForm);
+
+            // Adjust keys if backend expects different names
+            const postData = {
+                from_account_id: formData.get('from_account'),
+                to_account_id: formData.get('to_account'),
+                amount: parseFloat(formData.get('amount')), // Ensure float
+                description: formData.get('description')
+            };
+            // Get CSRF token if needed
+            // const csrfToken = formData.get('csrf_token');
+
+            fetch(transferForm.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Sending JSON
+                    'Accept': 'application/json',
+                     // 'X-CSRFToken': csrfToken // Add if using CSRF headers
+                },
+                body: JSON.stringify(postData)
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+            .catch(networkError => { throw { data: { message: 'Network error during transfer.' } }; }) // Use 'message' for consistency
+            .then(result => {
+                if (result.ok && result.data.success) {
+                    showNotification(result.data.message || 'Transfer successful!', 'success');
+                    // Redirect to dashboard or transactions page after delay
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('dashboard') }}"; // Or transactions page
+                    }, 1500);
+                    // Keep button loading during redirect
+                } else {
+                    throw result; // Throw error for .catch block
+                }
+            })
+            .catch(errorInfo => {
+                console.error("Transfer Error:", errorInfo);
+                const errorData = errorInfo.data || {};
+                showNotification(errorData.message || 'Transfer failed. Please try again.', 'error');
+
+                 // Display specific field errors if backend provides them
+                 // Example: if backend returns { message: "...", field_errors: { amount: "..." } }
+                 if (errorData.field_errors) {
+                     transferForm.classList.add('was-validated');
+                     for (const [fieldId, message] of Object.entries(errorData.field_errors)) {
+                         const inputElement = document.getElementById(fieldId);
+                          if(inputElement) displayFieldError(inputElement, message);
+                     }
+                 }
+                 setLoading(submitBtn, false); // Reset button ONLY on error
+            });
+        });
+    }
+
+    // --- Notification Function (Ensure Defined - Prefer globally in layout.html) ---
+    if (typeof window.showGlobalNotification !== 'function') {
+        console.warn("Defining showGlobalNotification locally in transfer.html.");
+        window.showGlobalNotification = function(message, type = 'info', duration = 4000) { /* ... Full function ... */ };
+        if (!document.getElementById('popup-notification-styles')) { /* Add animation styles */ }
+    }
+    const showNotification = window.showGlobalNotification;
+
+}); // End DOMContentLoaded
+</script>
+{% endblock %}
+{# --- SCRIPTS BLOCK END --- #}

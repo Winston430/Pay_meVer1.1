@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PayMe Tanzania - The easiest way to send and receive money securely and instantly across Tanzania.">
+    <title>PayMe Tanzania - {% block title %}Secure Payments{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}"> <!-- Optional: Add 180x180 png -->
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --primary-dark: #2e59d9;
+            --primary-light: #85a0ef;
+            --secondary-color: #1cc88a;
+            --secondary-dark: #17a673;
+            --accent-purple: #6f42c1; /* Added for variety */
+            --accent-blue: #36b9cc;   /* Info color */
+            --dark-color: #343a40; /* Darker for better contrast */
+            --medium-gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --white-color: #ffffff;
+            --body-bg: #f7fafd; /* Slightly different light background */
+
+            --font-sans-serif: 'Poppins', sans-serif;
+            --font-weight-light: 300;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --font-weight-extrabold: 800;
+
+            --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+            --shadow-md: 0 .5rem 1rem rgba(0,0,0,.1); /* Slightly softer shadow */
+            --shadow-lg: 0 1rem 2.5rem rgba(0,0,0,.12); /* Softer large shadow */
+            --border-radius-sm: 0.25rem;
+            --border-radius-md: 0.5rem;
+            --border-radius-lg: 0.75rem;
+            --transition-base: all 0.3s ease-in-out;
+        }
+
+        /* --- BASE & TYPOGRAPHY --- */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans-serif);
+            font-weight: var(--font-weight-normal);
+            color: var(--dark-color);
+            background-color: var(--body-bg);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: var(--font-weight-semibold);
+            line-height: 1.3;
+            color: var(--dark-color); /* Ensure headings use the darker color */
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: none; /* Keep underlines off by default */
+        }
+
+        /* --- UTILITIES --- */
+        .gradient-bg {
+           background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
+        .section-padding {
+            padding: 4rem 0;
+        }
+        .card-hover {
+            transition: var(--transition-base);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        /* --- NAVIGATION --- */
+        .navbar {
+            padding: 0.5rem 1rem; /* Slightly reduced padding */
+            background-color: var(--white-color); /* Changed to solid white */
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-base);
+            z-index: 1030; /* Ensure it's above other content */
+        }
+        .navbar.scrolled { /* Style for when page is scrolled */
+            box-shadow: var(--shadow-md);
+            /* background-color: rgba(255, 255, 255, 0.95); */
+            /* backdrop-filter: blur(5px); /* Optional: Glass effect on scroll */
+        }
+
+        .navbar-brand {
+            font-weight: var(--font-weight-bold);
+            font-size: 1.6rem;
+            color: var(--primary-color) !important; /* Brand color */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-brand .brand-icon { /* Refined icon */
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        .navbar-brand .brand-text {
+            margin-top: 2px; /* Align text slightly better */
+        }
+
+        .navbar-nav .nav-item {
+            margin: 0 0.25rem; /* Reduced margin */
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--medium-gray) !important;
+            font-weight: var(--font-weight-medium);
+            padding: 0.6rem 1rem !important; /* Adjusted padding */
+            border-radius: var(--border-radius-md);
+            transition: var(--transition-base);
+            position: relative;
+        }
+        /* Hover/Active state with background pill */
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            background-color: rgba(78, 115, 223, 0.08); /* Light primary background */
+        }
+        /* Optional: subtle bottom border for active link */
+        .navbar-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 1rem;
+            right: 1rem;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* User Dropdown */
+        .dropdown-menu {
+            border: none;
+            border-radius: var(--border-radius-lg); /* Slightly larger radius */
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem !important; /* Closer to nav */
+            min-width: 250px;
+            animation: dropdownFade 0.2s ease-out;
+            overflow: hidden; /* Ensures rounded corners apply to content */
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            font-weight: var(--font-weight-medium);
+            transition: var(--transition-base);
+            display: flex;
+            align-items: center;
+            color: var(--dark-color);
+            gap: 0.8rem; /* Space between icon and text */
+        }
+        .dropdown-item i {
+            width: 20px; /* Fixed width for alignment */
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transition: var(--transition-base);
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: rgba(78, 115, 223, 0.08);
+            color: var(--primary-dark);
+            padding-left: 1.8rem; /* Indent on hover */
+        }
+         .dropdown-item:hover i, .dropdown-item:focus i {
+            opacity: 1;
+            transform: scale(1.1);
+         }
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* User Profile in Dropdown */
+        .dropdown-user-profile {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--light-gray); /* Use light gray */
+        }
+        .dropdown-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-blue));
+            color: var(--white-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-semibold);
+            font-size: 1.1rem;
+            margin-right: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        /* Navbar User Avatar (outside dropdown) */
+        .navbar-user-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+             background: linear-gradient(135deg, var(--primary-color), var(--accent-blue));
+             color: var(--white-color);
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             border-radius: 50%;
+             font-weight: var(--font-weight-semibold);
+             box-shadow: var(--shadow-sm);
+        }
+        .nav-link .navbar-user-avatar { /* Adjust margin if needed when inside link */
+            margin-right: 0.5rem;
+        }
+
+        .dropdown-user-info strong {
+            display: block;
+            color: var(--dark-color);
+            font-weight: var(--font-weight-semibold);
+            line-height: 1.2;
+        }
+        .dropdown-user-info small {
+            color: var(--medium-gray);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive Navbar Collapse */
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+        }
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+        .navbar-toggler-icon {
+             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(78, 115, 223, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+             height: 1.8em;
+             width: 1.8em;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background-color: var(--white-color);
+                border-radius: var(--border-radius-md);
+                box-shadow: var(--shadow-md);
+                padding: 1rem;
+                margin-top: 0.5rem;
+                border: 1px solid rgba(0,0,0,.05);
+            }
+            .navbar-nav .nav-link {
+                padding: 0.8rem 1rem !important;
+                margin-bottom: 0.25rem;
+            }
+             .navbar-nav .nav-link.active::after {
+                 display: none; /* Hide underline on mobile */
+             }
+             .navbar-nav .nav-item:last-child .nav-link {
+                  margin-bottom: 0;
+             }
+            .navbar-nav .btn-register-nav { /* Ensure register button looks good */
+                 display: block;
+                 text-align: center;
+                 margin-top: 0.5rem;
+             }
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex-grow: 1; /* Makes main content area take up remaining space */
+            padding: 2.5rem 0;
+        }
+        .container {
+             max-width: 1140px; /* Optional: Set max width for large screens */
+        }
+
+        /* Flash Messages Styling */
+        .alert {
+            border-radius: var(--border-radius-md);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: var(--font-weight-medium);
+            box-shadow: var(--shadow-sm);
+            border-width: 0; /* Remove default border */
+            border-left: 5px solid;
+        }
+        .alert::before { /* Add icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+        .alert-success { border-color: var(--secondary-dark); background-color: #e9f9f2; color: #17a673; }
+        .alert-success::before { content: "\f058"; } /* fas fa-check-circle */
+        .alert-danger { border-color: #dc3545; background-color: #fdecef; color: #c82333; }
+        .alert-danger::before { content: "\f071"; } /* fas fa-exclamation-triangle */
+        .alert-warning { border-color: #ffc107; background-color: #fff8e6; color: #dda82a; }
+        .alert-warning::before { content: "\f06a"; } /* fas fa-exclamation-circle */
+        .alert-info { border-color: var(--accent-blue); background-color: #eafcff; color: #2b99ab; }
+        .alert-info::before { content: "\f05a"; } /* fas fa-info-circle */
+
+        .alert .btn-close {
+            padding: 1rem; /* Increase click area */
+            margin-left: auto; /* Push to the right */
+             opacity: 0.7;
+             transition: var(--transition-base);
+        }
+         .alert .btn-close:hover {
+             opacity: 1;
+             transform: scale(1.1);
+         }
+
+        /* --- FOOTER --- */
+        footer.site-footer {
+            background-color: #1e293b; /* Dark blue-gray */
+            color: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+            padding: 3rem 0 1.5rem;
+            margin-top: auto; /* Pushes footer to bottom */
+            font-size: 0.9rem;
+        }
+        footer.site-footer h5 {
+            color: var(--white-color);
+            font-weight: var(--font-weight-semibold);
+            font-size: 1.1rem;
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.5px;
+        }
+        footer.site-footer .footer-links {
+            list-style: none;
+            padding-left: 0;
+        }
+        footer.site-footer .footer-links li {
+            margin-bottom: 0.6rem;
+        }
+        footer.site-footer .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            transition: var(--transition-base);
+            display: inline-block;
+        }
+        footer.site-footer .footer-links a:hover {
+            color: var(--white-color);
+            text-decoration: none;
+            transform: translateX(4px);
+        }
+        footer.site-footer .footer-social a {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.3rem;
+            margin-right: 1rem;
+            transition: var(--transition-base);
+            display: inline-block;
+        }
+        footer.site-footer .footer-social a:hover {
+            color: var(--white-color);
+            transform: scale(1.1) translateY(-2px);
+        }
+        footer.site-footer .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            font-weight: var(--font-weight-medium); /* Standardized weight */
+            border-radius: var(--border-radius-md);
+            padding: 0.6rem 1.2rem; /* Standardized padding */
+            transition: var(--transition-base);
+             letter-spacing: 0.3px;
+             box-shadow: var(--shadow-sm); /* Subtle shadow for all buttons */
+             border-width: 1px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn:active {
+            transform: translateY(0);
+             box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-light {
+            color: var(--white-color) !important;
+            border-color: rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem !important; /* Slightly smaller for outline light */
+            box-shadow: none; /* No initial shadow for this one */
+        }
+        .btn-outline-light:hover {
+            background-color: var(--white-color);
+            color: var(--primary-color) !important; /* Use primary color on hover */
+            border-color: var(--white-color);
+             box-shadow: 0 3px 10px rgba(255,255,255,.2);
+        }
+
+        .btn-register-nav { /* Specific style for register button in nav */
+             background-color: var(--primary-color);
+             color: var(--white-color) !important;
+             border-color: var(--primary-color);
+             padding: 0.5rem 1rem !important;
+        }
+        .btn-register-nav:hover {
+             background-color: var(--primary-dark);
+             border-color: var(--primary-dark);
+             color: var(--white-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fa-solid fa-wallet brand-icon"></i> <!-- Changed icon -->
+                <span class="brand-text">PayMe</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    {% if current_user.is_authenticated %}
+                        <!-- Authenticated Links -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}" aria-current="{{ 'page' if request.endpoint == 'dashboard' else 'false' }}">
+                                <i class="fas fa-tachometer-alt fa-fw me-1 opacity-75"></i> Dashboard
+                            </a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'send_money' %}active{% endif %}" href="{{ url_for('send_money') }}" aria-current="{{ 'page' if request.endpoint == 'send_money' else 'false' }}">
+                                <i class="fas fa-paper-plane fa-fw me-1 opacity-75"></i> Send Money
+                            </a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'transactions' %}active{% endif %}" href="{{ url_for('transactions') }}" aria-current="{{ 'page' if request.endpoint == 'transactions' else 'false' }}">
+                                <i class="fas fa-history fa-fw me-1 opacity-75"></i> History
+                            </a>
+                        </li>
+                        <!-- User Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="navbar-user-avatar me-2">
+                                    {{ current_user.username[0]|upper }}
+                                </div>
+                                <span class="d-none d-lg-inline">{{ current_user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <div class="dropdown-user-profile">
+                                        <div class="dropdown-user-avatar">
+                                            {{ current_user.username[0]|upper }}
+                                        </div>
+                                        <div class="dropdown-user-info">
+                                            <strong>{{ current_user.username }}</strong>
+                                            <small>{{ current_user.email }}</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('profile') }}">
+                                        <i class="fas fa-user fa-fw"></i> My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('settings') }}">
+                                        <i class="fas fa-cog fa-fw"></i> Account Settings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('support') }}">
+                                        <i class="fas fa-headset fa-fw"></i> Support
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{{ url_for('logout') }}" id="logoutLink">
+                                        <i class="fas fa-sign-out-alt fa-fw"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Public Links -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" aria-current="{{ 'page' if request.endpoint == 'index' else 'false' }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}" aria-current="{{ 'page' if request.endpoint == 'about' else 'false' }}">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'support' %}active{% endif %}" href="{{ url_for('support') }}" aria-current="{{ 'page' if request.endpoint == 'support' else 'false' }}">Support</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-register-nav ms-lg-2" href="{{ url_for('register') }}">
+                                Register Free
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main role="main">
+        <div class="container my-4"> {# Added margin top/bottom to container #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages-container mb-4">
+                        {% for category, message in messages %}
+                            {% set alert_class = category if category in ['success', 'danger', 'warning', 'info'] else 'info' %}
+                            <div class="alert alert-{{ alert_class }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row gy-4">
+                <!-- Footer About -->
+                <div class="col-lg-4 col-md-6">
+                    <h5>About PayMe Tanzania</h5>
+                    <p class="pe-lg-3">Simplifying payments across Tanzania with fast, secure, and low-cost money transfers. Connecting people and businesses seamlessly.</p>
+                     <div class="footer-brand mt-3">
+                        <a class="navbar-brand text-white" href="{{ url_for('index') }}" style="font-size: 1.4rem;">
+                             <i class="fa-solid fa-wallet brand-icon me-1" style="color: var(--white-color); background: none; -webkit-text-fill-color: var(--white-color);"></i>
+                            <span class="brand-text">PayMe</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-3 col-6">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('about') }}">About Us</a></li>
+                        <li><a href="{{ url_for('support') }}">Support</a></li>
+                        <li><a href="#">Fees</a></li> {# Add link if exists #}
+                    </ul>
+                </div>
+
+                <!-- Legal Links -->
+                <div class="col-lg-3 col-md-3 col-6">
+                    <h5>Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li> {# Add link if exists #}
+                        <li><a href="#">Terms of Service</a></li> {# Add link if exists #}
+                        <li><a href="#">Security</a></li> {# Add link if exists #}
+                    </ul>
+                </div>
+
+                <!-- Social Media & Contact -->
+                <div class="col-lg-3 col-md-12 text-md-start text-lg-start mt-md-4 mt-lg-0">
+                    <h5>Connect With Us</h5>
+                     <p>Follow us on social media for updates and news.</p>
+                    <div class="footer-social mt-3">
+                        <a href="#" aria-label="Facebook" data-bs-toggle="tooltip" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Twitter" data-bs-toggle="tooltip" title="Twitter (X)"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram" data-bs-toggle="tooltip" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn" data-bs-toggle="tooltip" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                © <span id="copyright-year"></span> PayMe Tanzania. All Rights Reserved. Built with <i class="fas fa-heart text-danger mx-1"></i> for Tanzania.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- Custom JavaScript -->
+    <script defer> // Use defer to load after HTML parsing
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- Navbar Styling on Scroll ---
+            const mainNav = document.getElementById('mainNav');
+            if (mainNav) {
+                const handleScroll = () => {
+                    if (window.scrollY > 50) {
+                        mainNav.classList.add('scrolled');
+                    } else {
+                        mainNav.classList.remove('scrolled');
+                    }
+                };
+                window.addEventListener('scroll', handleScroll);
+                handleScroll(); // Initial check in case page loads scrolled
+            }
+
+            // --- Logout Confirmation ---
+            const logoutLink = document.getElementById('logoutLink');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    if (!confirm('Are you sure you want to logout?')) {
+                        e.preventDefault(); // Cancel navigation if user clicks "Cancel"
+                    }
+                });
+            }
+
+            // --- Auto-dismiss Alerts ---
+            const autoDismissAlerts = document.querySelectorAll('.alert-dismissible');
+            autoDismissAlerts.forEach(alert => {
+                setTimeout(() => {
+                    // Check if alert still exists before trying to close
+                    if (alert && alert.parentNode) {
+                         const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                         if (bsAlert) {
+                              bsAlert.close();
+                         }
+                    }
+                }, 6000); // Increased time to 6 seconds
+            });
+
+            // --- Bootstrap Tooltips ---
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                     trigger: 'hover' // Show tooltip on hover only
+                });
+            });
+
+             // --- Dynamic Copyright Year ---
+             const yearSpan = document.getElementById('copyright-year');
+             if (yearSpan) {
+                 yearSpan.textContent = new Date().getFullYear();
+             }
+
+             // --- Simple Active Nav Link (Basic Example - More robust might need Flask context) ---
+             // This is a very basic client-side only check.
+             const currentPath = window.location.pathname;
+             const navLinks = document.querySelectorAll('#navbarNav .nav-link');
+             navLinks.forEach(link => {
+                 // Remove trailing slash for comparison if present
+                 const linkPath = new URL(link.href).pathname.replace(/\/$/, '');
+                 const currentCleanPath = currentPath.replace(/\/$/, '');
+
+                 if (linkPath === currentCleanPath && !link.classList.contains('dropdown-toggle')) {
+                     // Check if it matches exactly (and not a dropdown)
+                     // Remove active from others first to avoid multiple active links
+                     document.querySelectorAll('#navbarNav .nav-link.active').forEach(activeLink => activeLink.classList.remove('active'));
+                     link.classList.add('active');
+                     link.setAttribute('aria-current', 'page');
+                 } else if (link.classList.contains('active') && linkPath !== currentCleanPath) {
+                     // Clean up potentially incorrect 'active' classes from server-side rendering if path doesn't match
+                     // link.classList.remove('active');
+                     // link.removeAttribute('aria-current');
+                     // Note: Commented out as server-side `active` class might be preferred. Adjust as needed.
+                 }
+             });
+
+
+        });
+    </script>
+
+    {% block scripts %}{% endblock %} <!-- Optional block for page-specific scripts -->
+
+</body>
+</html>

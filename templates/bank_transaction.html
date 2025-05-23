@@ -1,0 +1,276 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-university me-2"></i>Bank Transfer</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('bank_transaction') }}" id="transferForm">
+                        <!-- Flash Messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <!-- Your Bank Account -->
+                        <div class="mb-3">
+                            <label for="payment_method_id" class="form-label fw-bold">Your Bank Account</label>
+                            <select class="form-select form-select-lg" id="payment_method_id" name="payment_method_id" required>
+                                <option value="">Select your account</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}" data-balance="{{ method.balance }}">
+                                    {{ method.bank_name }} - {{ method.account_number }} ({{ method.balance|format_currency }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Available balance: <span id="accountBalance">--</span></div>
+                        </div>
+
+                        <!-- Recipient Details -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Recipient Details</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" placeholder="Recipient Full Name" id="recipient_name" name="recipient_name" required>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-university"></i></span>
+                                <input type="text" class="form-control" placeholder="Bank Account Number" id="bank_account" name="bank_account" required>
+                                <button class="btn btn-outline-secondary" type="button" id="verifyAccountBtn">
+                                    <i class="fas fa-check-circle"></i> Verify
+                                </button>
+                            </div>
+                            <div id="bankDetails" class="mt-2 p-2 bg-light rounded d-none">
+                                <small class="text-success"><i class="fas fa-check-circle"></i> Verified</small>
+                                <div class="d-flex justify-content-between">
+                                    <span id="bankName">Bank: --</span>
+                                    <span id="accountName">Account Name: --</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label for="amount" class="form-label fw-bold">Amount (TZS)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">TZS</span>
+                                <input type="number" class="form-control form-control-lg" id="amount" name="amount" min="1000" step="100" required>
+                                <button class="btn btn-outline-primary" type="button" id="maxAmountBtn">Max</button>
+                            </div>
+                            <div class="form-text">Minimum transfer: 1,000 TZS</div>
+                        </div>
+
+                        <!-- Reference -->
+                        <div class="mb-4">
+                            <label for="reference" class="form-label fw-bold">Reference (Optional)</label>
+                            <input type="text" class="form-control" id="reference" name="reference" placeholder="e.g., Invoice #1234" maxlength="50">
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="card mb-4 border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Transfer Summary</h5>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>You send:</span>
+                                    <strong id="sendAmount">0.00 TZS</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Fee:</span>
+                                    <strong id="feeAmount">0.00 TZS</strong>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total:</span>
+                                    <strong id="totalAmount">0.00 TZS</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>Confirm Transfer
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    #verifyAccountBtn {
+        transition: all 0.3s;
+    }
+    #verifyAccountBtn:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+    #bankDetails {
+        transition: all 0.3s;
+    }
+    #submitBtn:disabled {
+        opacity: 0.7;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('transferForm');
+        const accountSelect = document.getElementById('payment_method_id');
+        const amountInput = document.getElementById('amount');
+        const maxAmountBtn = document.getElementById('maxAmountBtn');
+        const verifyBtn = document.getElementById('verifyAccountBtn');
+        const bankDetails = document.getElementById('bankDetails');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Initialize form validation
+        function validateForm() {
+            const amount = parseFloat(amountInput.value) || 0;
+            const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+            const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            const total = amount + calculateFee(amount);
+            
+            // Disable submit if insufficient balance
+            if (total > balance) {
+                submitBtn.disabled = true;
+                amountInput.classList.add('is-invalid');
+                return false;
+            } else {
+                submitBtn.disabled = false;
+                amountInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+        
+        // Calculate transfer fee
+        function calculateFee(amount) {
+            return Math.max(500, amount * 0.01); // 1% fee with 500 TZS minimum
+        }
+        
+        // Update balance display when account changes
+        accountSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const balance = selectedOption ? parseFloat(selectedOption.getAttribute('data-balance')) : 0;
+            document.getElementById('accountBalance').textContent = balance.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+                minimumFractionDigits: 2
+            });
+            validateForm();
+            updateSummary();
+        });
+        
+        // Max amount button
+        maxAmountBtn.addEventListener('click', function() {
+            const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+            if (!selectedOption || !selectedOption.value) {
+                alert('Please select an account first');
+                return;
+            }
+            
+            const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            const maxAmount = balance - calculateFee(balance);
+            amountInput.value = Math.max(1000, maxAmount).toFixed(2);
+            updateSummary();
+            validateForm();
+        });
+        
+        // Amount input live update
+        amountInput.addEventListener('input', function() {
+            updateSummary();
+            validateForm();
+        });
+        
+        // Mock account verification
+        verifyBtn.addEventListener('click', function() {
+            const accountNumber = document.getElementById('bank_account').value.trim();
+            if (accountNumber.length < 5) {
+                alert('Please enter a valid account number (minimum 5 characters)');
+                return;
+            }
+            
+            // Show loading state
+            verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+            verifyBtn.disabled = true;
+            
+            // Simulate API verification delay
+            setTimeout(() => {
+                bankDetails.classList.remove('d-none');
+                document.getElementById('bankName').textContent = 'Bank: NMB';
+                document.getElementById('accountName').textContent = 'Account Name: Verified Account';
+                verifyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verified';
+                verifyBtn.classList.remove('btn-outline-secondary');
+                verifyBtn.classList.add('btn-outline-success');
+                validateForm();
+            }, 1500);
+        });
+        
+        // Update summary section
+        function updateSummary() {
+            const amount = parseFloat(amountInput.value) || 0;
+            const fee = calculateFee(amount);
+            const total = amount + fee;
+            
+            document.getElementById('sendAmount').textContent = amount.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+                minimumFractionDigits: 2
+            });
+            document.getElementById('feeAmount').textContent = fee.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+                minimumFractionDigits: 2
+            });
+            document.getElementById('totalAmount').textContent = total.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+                minimumFractionDigits: 2
+            });
+        }
+        
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                alert('Please check your inputs. You may not have sufficient balance for this transfer.');
+                return false;
+            }
+            
+            // Show loading state
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            submitBtn.disabled = true;
+            return true;
+        });
+        
+        // Initialize form
+        if (accountSelect.options.length > 0) {
+            accountSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %}

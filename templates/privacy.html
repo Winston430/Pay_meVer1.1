@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block title %}Privacy Policy - PayMe Tanzania{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-form-container" style="max-width: 800px;">
+        <div class="auth-header">
+            <h1>Privacy Policy</h1>
+            <p>Last Updated: {{ current_date }}</p>
+        </div>
+
+        <div class="privacy-content">
+            <section>
+                <h2>1. Information We Collect</h2>
+                <p>We collect personal information including but not limited to:</p>
+                <ul>
+                    <li>Name, email address, phone number</li>
+                    <li>Transaction history</li>
+                    <li>Device information</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>2. How We Use Your Information</h2>
+                <p>Your information is used to:</p>
+                <ul>
+                    <li>Provide and improve our services</li>
+                    <li>Process transactions</li>
+                    <li>Comply with legal requirements</li>
+                    <li>Prevent fraud and enhance security</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>3. Data Protection</h2>
+                <p>We implement security measures including:</p>
+                <ul>
+                    <li>Encryption of sensitive data</li>
+                    <li>Regular security audits</li>
+                    <li>Access controls</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>4. Third-Party Sharing</h2>
+                <p>We may share information with:</p>
+                <ul>
+                    <li>Financial institutions for transaction processing</li>
+                    <li>Regulatory authorities when required by law</li>
+                    <li>Service providers under confidentiality agreements</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>5. Your Rights</h2>
+                <p>You have the right to:</p>
+                <ul>
+                    <li>Access your personal data</li>
+                    <li>Request correction of inaccurate data</li>
+                    <li>Request deletion of your data (subject to legal requirements)</li>
+                </ul>
+            </section>
+
+            <div class="auth-footer">
+                <p>If you have any questions about our Privacy Policy, please contact our support team.</p>
+                <a href="{{ url_for('register') }}" class="btn-primary" style="display: inline-block; margin-top: 20px;">Back to Registration</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .privacy-content {
+        padding: 20px;
+        line-height: 1.8;
+    }
+    
+    .privacy-content section {
+        margin-bottom: 30px;
+    }
+    
+    .privacy-content h2 {
+        color: var(--primary);
+        margin: 20px 0 10px;
+        font-size: 1.3rem;
+    }
+    
+    .privacy-content ul {
+        padding-left: 20px;
+        margin: 10px 0;
+    }
+    
+    .privacy-content li {
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}

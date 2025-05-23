@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="send-money-container">
+    <div class="send-money-header">
+        <h2><i class="fas fa-paper-plane"></i> Send Money</h2>
+        <div class="wallet-balance">
+            Available Balance: <strong>{{ "{:,.2f}".format(total_balance) }} TZS</strong>
+        </div>
+    </div>
+    
+    <form method="POST" class="send-money-form">
+        <div class="form-group">
+            <label>Amount to Send (TZS)</label>
+            <input type="number" name="amount" class="form-control" 
+                   placeholder="0.00" step="0.01" min="0.01" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Recipient Type</label>
+            <select name="recipient_type" id="recipient-type" class="form-control" required>
+                <option value="">Select recipient type</option>
+                <option value="mobile">Mobile Money</option>
+                <option value="bank">Bank Account</option>
+            </select>
+        </div>
+        
+        <div id="recipient-details">
+            <!-- Dynamic fields will appear here -->
+        </div>
+        
+        <div class="form-group">
+            <label>Notes (Optional)</label>
+            <textarea name="notes" class="form-control" 
+                     placeholder="What's this payment for?"></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-send">
+            <i class="fas fa-paper-plane"></i> Send Money Now
+        </button>
+    </form>
+</div>
+
+<script>
+document.getElementById('recipient-type').addEventListener('change', function() {
+    const type = this.value;
+    const container = document.getElementById('recipient-details');
+    container.innerHTML = '';
+    
+    if (type === 'mobile') {
+        container.innerHTML = `
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" name="recipient_number" class="form-control" 
+                       placeholder="07XXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label>Mobile Network</label>
+                <select name="network_or_bank" class="form-control" required>
+                    <option value="">Select network</option>
+                    <option value="vodacom">Vodacom M-Pesa</option>
+                    <option value="tigo">Tigo Pesa</option>
+                    <option value="airtel">Airtel Money</option>
+                    <option value="halopesa">Halopesa</option>
+                </select>
+            </div>
+        `;
+    } 
+    else if (type === 'bank') {
+        container.innerHTML = `
+            <div class="form-group">
+                <label>Bank Account Number</label>
+                <input type="text" name="recipient_number" class="form-control" 
+                       placeholder="Account number" required>
+            </div>
+            <div class="form-group">
+                <label>Bank Name</label>
+                <select name="network_or_bank" class="form-control" required>
+                    <option value="">Select bank</option>
+                    <option value="nmb">NMB</option>
+                    <option value="crdb">CRDB</option>
+                    <option value="exim">Exim Bank</option>
+                    <option value="nbc">NBC</option>
+                    <option value="stanbic">Stanbic</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Account Name</label>
+                <input type="text" name="account_name" class="form-control" 
+                       placeholder="Recipient's name as in bank" required>
+            </div>
+        `;
+    }
+});
+</script>
+
+<style>
+.send-money-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.send-money-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.send-money-header h2 {
+    margin: 0;
+    color: #4361ee;
+}
+
+.wallet-balance {
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.send-money-form .form-group {
+    margin-bottom: 20px;
+}
+
+.send-money-form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.btn-send {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+</style>
+{% endblock %}

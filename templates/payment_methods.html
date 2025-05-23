@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+{% block title %}Payment Method - PayMe Tanzania{% endblock %}
+{% block content %}
+<div class="payment-methods-container">
+    <h2>Add Payment Method</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% for method in methods %}
+    <div class="payment-card {{ 'mobile-money' if method.method_type == 'mobile' else 'bank-account' }}">
+        <!-- ... other card content ... -->
+        <div class="balance" id="balance-{{ method.id }}" style="display:none;">
+            <span class="balance-label">Available:</span>
+            <span class="balance-amount">
+                {{ "{:,.2f}".format(getattr(method, 'balance', 0)) }} TZS
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+
+    <form method="POST" action="{{ url_for('payment_methods') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="redirect_to" value="dashboard">
+        
+        <div class="form-group">
+            <label for="method_type">Payment Type</label>
+            <select class="form-control" id="method_type" name="method_type" required>
+                <option value="">Select payment type</option>
+                <option value="mobile">Mobile Money</option>
+                <option value="bank">Bank Account</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="provider">Provider</label>
+            <select class="form-control" id="provider" name="provider" required>
+                <option value="">Select provider</option>
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="account_name">Account Name</label>
+            <input type="text" class="form-control" id="account_name" name="account_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="account_number">Account Number</label>
+            <input type="text" class="form-control" id="account_number" name="account_number" required>
+        </div>
+
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="is_default" name="is_default">
+            <label class="form-check-label" for="is_default">Set as default payment method</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Payment Method</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    // Providers data
+    const providers = {
+        mobile: ['HaloPesa', 'Yas', 'Airtel Money', 'Mpesa', 'Tpesa', 'Azampesa'],
+        bank: ['CRDB', 'NMB', 'NBC', 'ABSA', 'EQUITY', 'AZANIA BANK']
+    };
+
+    // Update provider options when payment type changes
+    document.getElementById('method_type').addEventListener('change', function() {
+        const providerSelect = document.getElementById('provider');
+        providerSelect.innerHTML = '<option value="">Select provider</option>';
+        
+        if (this.value) {
+            providers[this.value].forEach(provider => {
+                const option = document.createElement('option');
+                option.value = provider;
+                option.textContent = provider;
+                providerSelect.appendChild(option);
+            });
+        }
+    });
+</script>
+
+<style>
+    .payment-methods-container {
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    
+    .btn-primary {
+        background-color: #0066cc;
+        border: none;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0052a3;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .alert {
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Pay Merchants</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="merchant_id" class="form-label">Select Merchant</label>
+                    <select class="form-select" id="merchant_id" name="merchant_id" required>
+                        <option value="">Select a merchant</option>
+                        {% for merchant in merchants %}
+                        <option value="{{ merchant.id }}">{{ merchant.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="payment_method_id" class="form-label">Payment Method</label>
+                    <select class="form-select" id="payment_method_id" name="payment_method_id" required>
+                        <option value="">Select payment method</option>
+                        {% for method in payment_methods %}
+                        <option value="{{ method.id }}">
+                            {{ method.method_type }} ({{ method.account_number }})
+                            - Balance: {{ method.balance }} TZS
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount (TZS)</label>
+                    <input type="number" class="form-control" id="amount" name="amount" 
+                           min="1" step="0.01" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="reference" class="form-label">Reference (Optional)</label>
+                    <input type="text" class="form-control" id="reference" name="reference"
+                           placeholder="Invoice number, order ID, etc.">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Make Payment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

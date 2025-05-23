@@ -1,0 +1,301 @@
+{% extends "layout.html" %}
+{% block title %}Buy Airtime{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-mobile-alt me-2"></i>Buy Airtime</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if payment_methods %}
+                    <form method="POST" action="{{ url_for('buy_airtime') }}" id="airtimeForm">
+                        <!-- Recipient Phone -->
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label fw-bold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text">+255</span>
+                                <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                       pattern="[0-9]{9}" placeholder="612345678" required
+                                       title="Enter 9-digit Tanzania phone number (without +255)">
+                                <button class="btn btn-outline-secondary" type="button" id="detectNetworkBtn">
+                                    <i class="fas fa-search"></i> Detect
+                                </button>
+                            </div>
+                            <div id="networkInfo" class="mt-2 p-2 bg-light rounded d-none">
+                                <small class="text-success"><i class="fas fa-check-circle"></i> Detected</small>
+                                <span id="networkName">Network: --</span>
+                            </div>
+                            <small class="text-muted">Format: 612345678 (9 digits without +255)</small>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label for="amount" class="form-label fw-bold">Amount (TZS)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">TZS</span>
+                                <input type="number" class="form-control" id="amount" name="amount" 
+                                       min="100" max="1000000" step="100" required>
+                                <button type="button" class="btn btn-outline-secondary" id="quickAmount5000">5,000</button>
+                                <button type="button" class="btn btn-outline-secondary" id="quickAmount10000">10,000</button>
+                                <button type="button" class="btn btn-outline-primary" id="maxAmountBtn">Max</button>
+                            </div>
+                            <small class="text-muted">Minimum: 100 TZS, Maximum: 1,000,000 TZS</small>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label for="payment_method_id" class="form-label fw-bold">From Account</label>
+                            <select class="form-select" id="payment_method_id" name="payment_method_id" required>
+                                <option value="">Select mobile money account</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}" data-number="{{ method.account_number }}" data-balance="{{ method.balance }}">
+                                    {{ method.provider }} - {{ method.account_number }} ({{ method.balance|format_currency }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Available: <span id="accountBalance">--</span></div>
+                        </div>
+
+                        <!-- Reference -->
+                        <div class="mb-4">
+                            <label for="reference" class="form-label">Reference (Optional)</label>
+                            <input type="text" class="form-control" id="reference" name="reference" 
+                                   placeholder="e.g., For lunch" maxlength="50">
+                        </div>
+
+                        <!-- Transaction Summary -->
+                        <div class="card mb-4 border-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Transaction Summary</h5>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Airtime Amount:</span>
+                                    <strong id="airtimeAmount">0.00 TZS</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Transaction Fee:</span>
+                                    <strong id="feeAmount">0.00 TZS</strong>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total Deducted:</span>
+                                    <strong id="totalAmount">0.00 TZS</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i> Buy Airtime
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>No Mobile Money Accounts</h5>
+                        <p>You need to add a mobile money account before buying airtime.</p>
+                        <a href="{{ url_for('payment_methods') }}" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus-circle me-2"></i> Add Payment Method
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    #quickAmount5000, #quickAmount10000, #maxAmountBtn {
+        transition: all 0.2s;
+    }
+    #quickAmount5000:hover, #quickAmount10000:hover {
+        background-color: #198754;
+        color: white;
+    }
+    #maxAmountBtn:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+    #detectNetworkBtn:hover {
+        background-color: #6c757d;
+        color: white;
+    }
+    #submitBtn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('airtimeForm');
+    const paymentSelect = document.getElementById('payment_method_id');
+    const amountInput = document.getElementById('amount');
+    const detectBtn = document.getElementById('detectNetworkBtn');
+    const networkInfo = document.getElementById('networkInfo');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Quick amount buttons
+    document.getElementById('quickAmount5000').addEventListener('click', function() {
+        amountInput.value = '5000';
+        updateSummary();
+    });
+    document.getElementById('quickAmount10000').addEventListener('click', function() {
+        amountInput.value = '10000';
+        updateSummary();
+    });
+
+    // Max amount button
+    document.getElementById('maxAmountBtn').addEventListener('click', function() {
+        const selectedOption = paymentSelect.options[paymentSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            const maxAmount = balance / 1.01; // Account for 1% fee
+            amountInput.value = Math.max(100, Math.min(maxAmount, 1000000)).toFixed(2);
+            updateSummary();
+        } else {
+            alert('Please select a payment method first');
+        }
+    });
+
+    // Network detection
+    detectBtn.addEventListener('click', function() {
+        const phoneNumber = document.getElementById('phone_number').value;
+        if (phoneNumber.length !== 9) {
+            alert('Please enter a valid 9-digit phone number first');
+            return;
+        }
+
+        // Show loading state
+        detectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Detecting';
+        detectBtn.disabled = true;
+
+        // Simulate network detection
+        setTimeout(() => {
+            const prefix = phoneNumber.substring(0, 2);
+            const networks = {
+                '78': 'Airtel', '79': 'Airtel', '68': 'Airtel', '69': 'Airtel',
+                '65': 'Tigo', '67': 'Tigo', '71': 'Tigo',
+                '76': 'Vodacom', '75': 'Vodacom',
+                '74': 'Halotel', '77': 'Zantel'
+            };
+            
+            const network = networks[prefix] || 'Unknown';
+            document.getElementById('networkName').textContent = `Network: ${network}`;
+            networkInfo.classList.remove('d-none');
+            
+            detectBtn.innerHTML = '<i class="fas fa-check-circle"></i> Detected';
+            detectBtn.classList.remove('btn-outline-secondary');
+            detectBtn.classList.add('btn-outline-success');
+        }, 1500);
+    });
+
+    // Update account balance display
+    paymentSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            document.getElementById('accountBalance').textContent = balance.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+                minimumFractionDigits: 2
+            });
+        } else {
+            document.getElementById('accountBalance').textContent = '--';
+        }
+        updateSummary();
+    });
+
+    // Update transaction summary
+    function updateSummary() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const fee = Math.max(100, amount * 0.01); // 1% fee with 100 TZS minimum
+        const total = amount + fee;
+        
+        document.getElementById('airtimeAmount').textContent = amount.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+        document.getElementById('feeAmount').textContent = fee.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+        document.getElementById('totalAmount').textContent = total.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'TZS',
+            minimumFractionDigits: 2
+        });
+
+        // Validate balance
+        const selectedOption = paymentSelect.options[paymentSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            const balance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            submitBtn.disabled = total > balance;
+        }
+    }
+
+    // Amount input live update
+    amountInput.addEventListener('input', updateSummary);
+
+    // Prevent sending to self
+    form.addEventListener('submit', function(e) {
+        const selectedOption = paymentSelect.options[paymentSelect.selectedIndex];
+        const recipientPhone = document.getElementById('phone_number').value;
+        
+        if (selectedOption && selectedOption.value) {
+            const myPhone = selectedOption.getAttribute('data-number').replace('+255', '');
+            
+            if (recipientPhone === myPhone) {
+                e.preventDefault();
+                alert('Error: You cannot buy airtime for your own number!');
+                return false;
+            }
+        }
+
+        // Show loading state
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...';
+        submitBtn.disabled = true;
+        return true;
+    });
+
+    // Format phone number input
+    document.getElementById('phone_number').addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);
+    });
+
+    // Initialize form
+    if (paymentSelect.options.length > 1) {
+        paymentSelect.selectedIndex = 1;
+        paymentSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %}

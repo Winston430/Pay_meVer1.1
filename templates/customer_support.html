@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Customer Support{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Customer Support</h2>
+    <p>
+        Need help? We're here for you! Contact us through the following channels:
+    </p>
+    <ul>
+        <li>Email: support@paymetanzania.com</li>
+        <li>Phone: +255 123 456 789</li>
+        <li>Live Chat: Available 24/7 (Coming Soon!)</li>
+    </ul>
+    <a href="{{ url_for('index') }}" class="btn btn-link">Back to Home</a>
+</div>
+{% endblock %}

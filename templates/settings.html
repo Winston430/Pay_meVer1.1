@@ -1,0 +1,711 @@
+{% extends "layout.html" %}
+
+{% block title %}Account Settings - PayMe Tanzania{% endblock %}
+
+{# Add a block for page-specific CSS, if your layout supports it #}
+{% block styles %}
+{{ super() }} {# Include styles from layout #}
+<style>
+    /* --- Settings Page Specific Styles --- */
+
+    .setting-card {
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--bs-card-border-radius, 0.75rem); /* Use Bootstrap var or fallback */
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        background-color: var(--bs-card-bg, white); /* Use Bootstrap var */
+    }
+
+    .setting-card:hover {
+        /* transform: translateY(-3px); */ /* Optional subtle hover */
+        box-shadow: var(--bs-box-shadow-lg); /* Use Bootstrap var */
+    }
+
+    .setting-card-header {
+        background-color: transparent; /* Cleaner look */
+        border-bottom: 1px solid var(--bs-border-color-translucent);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem; /* Space between icon and text */
+        color: var(--bs-body-color); /* Use standard text color */
+    }
+    .setting-card-header .h5 {
+         color: var(--primary-color, #4e73df); /* Make header text primary */
+    }
+     .setting-card-header i {
+          opacity: 0.8;
+     }
+
+    .setting-card .card-body {
+        padding: 1.5rem; /* Consistent padding */
+    }
+
+    /* Password Toggle Button */
+    .password-toggle {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 3;
+        color: var(--bs-secondary-color); /* Use Bootstrap secondary text color */
+        padding: 0.5rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+    .password-toggle:hover {
+        color: var(--bs-primary);
+    }
+
+    /* Theme Selector Buttons */
+    .theme-selector .btn-check:checked + .btn-outline-secondary {
+        background-color: var(--bs-primary);
+        color: var(--bs-white);
+        border-color: var(--bs-primary);
+        box-shadow: none; /* Remove default focus shadow */
+    }
+    .theme-selector .btn {
+         transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    }
+
+    /* Form Switch Styling (Bootstrap default is usually fine) */
+    .form-switch .form-check-input {
+        width: 2.5em; /* Slightly smaller toggle */
+        height: 1.25em;
+        cursor: pointer;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e"); /* Default state */
+    }
+    .form-switch .form-check-input:checked {
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); /* Checked state */
+         background-color: var(--bs-success); /* Use success color when checked */
+         border-color: var(--bs-success);
+    }
+
+    /* Danger Zone Styling */
+    .setting-card.border-danger .setting-card-header {
+        background-color: var(--bs-danger-bg-subtle);
+        border-bottom-color: var(--bs-danger-border-subtle);
+    }
+     .setting-card.border-danger .setting-card-header .h5 {
+          color: var(--bs-danger-text-emphasis);
+     }
+      .setting-card.border-danger .setting-card-header i {
+          color: var(--bs-danger);
+     }
+
+    /* Modal Styling Refinements */
+    .modal-header.bg-warning { background-color: var(--bs-warning-bg-subtle) !important; }
+    .modal-header.bg-danger { background-color: var(--bs-danger-bg-subtle) !important; }
+    .modal-header .btn-close-dark { filter: none; } /* Adjust close button if needed */
+    .modal-footer { background-color: var(--bs-tertiary-bg); } /* Subtle footer background */
+
+
+    /* --- Dark Mode Overrides --- */
+    [data-bs-theme="dark"] {
+        /* Redefine BS vars or add overrides */
+        --bs-body-bg: #1a1a1a; /* Darker body */
+        --bs-body-color: #e1e1e1;
+        --bs-border-color: #3a3a3a;
+        --bs-border-color-translucent: rgba(255, 255, 255, 0.1);
+        --bs-tertiary-bg: #2a2a2a; /* Slightly lighter for elements */
+        --bs-card-bg: #242424; /* Card background */
+        --bs-list-group-bg: var(--bs-card-bg);
+        --bs-list-group-border-color: var(--bs-border-color);
+        --bs-list-group-color: var(--bs-body-color);
+        --bs-list-group-action-hover-bg: rgba(255, 255, 255, 0.05);
+
+        /* Primary/Secondary adjustments for dark */
+        --primary-color: #9067f1; /* Lighter purple for dark */
+        --bs-primary: var(--primary-color);
+        --bs-primary-text-emphasis: #a988f5;
+        --bs-primary-bg-subtle: rgba(144, 103, 241, 0.15);
+        --bs-primary-border-subtle: rgba(144, 103, 241, 0.3);
+
+        --secondary-color: #3dd5a6; /* Lighter teal for dark */
+        --bs-secondary: var(--secondary-color);
+
+        /* Adjust button outlines */
+        --bs-btn-color: var(--bs-body-color); /* Ensure default button text is visible */
+    }
+
+    [data-bs-theme="dark"] .setting-card {
+        border-color: var(--bs-border-color);
+    }
+     [data-bs-theme="dark"] .setting-card-header {
+         border-bottom-color: var(--bs-border-color);
+     }
+     [data-bs-theme="dark"] .setting-card-header .h5 {
+           color: var(--primary-color); /* Consistent header color */
+     }
+
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .form-select {
+        background-color: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+    [data-bs-theme="dark"] .form-control::placeholder { color: #888; }
+    [data-bs-theme="dark"] .form-control:focus,
+    [data-bs-theme="dark"] .form-select:focus {
+        background-color: var(--bs-tertiary-bg);
+        border-color: var(--bs-primary); /* Highlight focus */
+        color: var(--bs-body-color);
+    }
+     [data-bs-theme="dark"] .form-control:disabled,
+     [data-bs-theme="dark"] .form-control[readonly] {
+         background-color: rgba(255, 255, 255, 0.05); /* Different disabled bg */
+         opacity: 0.7;
+     }
+
+    [data-bs-theme="dark"] .text-muted {
+        color: var(--bs-secondary-color) !important; /* Use Bootstrap var */
+    }
+
+    [data-bs-theme="dark"] .theme-selector .btn-outline-secondary {
+        color: var(--bs-secondary-color);
+        border-color: var(--bs-border-color);
+    }
+    [data-bs-theme="dark"] .theme-selector .btn-check:checked + .btn-outline-secondary {
+         background-color: var(--bs-primary);
+         color: #fff; /* Ensure white text on primary */
+         border-color: var(--bs-primary);
+    }
+
+    [data-bs-theme="dark"] .form-switch .form-check-input {
+         background-color: rgba(255, 255, 255, 0.25); /* Darker off state */
+         border-color: rgba(255, 255, 255, 0.25);
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 0.25%29'/%3e%3c/svg%3e");
+    }
+    [data-bs-theme="dark"] .form-switch .form-check-input:checked {
+         background-color: var(--bs-success);
+         border-color: var(--bs-success);
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+
+    [data-bs-theme="dark"] .modal-content {
+         background-color: #2f2f2f; /* Slightly lighter than card */
+         border: 1px solid var(--bs-border-color);
+    }
+    [data-bs-theme="dark"] .modal-header.bg-warning { background-color: var(--bs-warning-bg-subtle) !important; color: var(--bs-warning-text-emphasis) !important;}
+    [data-bs-theme="dark"] .modal-header.bg-danger { background-color: var(--bs-danger-bg-subtle) !important; color: var(--bs-danger-text-emphasis) !important;}
+    [data-bs-theme="dark"] .modal-footer { background-color: var(--bs-tertiary-bg); border-top-color: var(--bs-border-color); }
+     [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); } /* Make close button white */
+
+</style>
+{% endblock %}
+
+{# --- MAIN CONTENT BLOCK --- #}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+
+            <h1 class="h2 mb-4 fw-bold text-center text-md-start animate__animated animate__fadeInDown">Account Settings</h1>
+
+            {# --- Personal Information Card --- #}
+            <div class="card setting-card mb-4 animate__animated animate__fadeInUp">
+                <div class="card-header setting-card-header">
+                    <h2 class="h5 mb-0 fw-semibold"><i class="fas fa-user-circle fa-fw"></i>Personal Information</h2>
+                </div>
+                <div class="card-body p-4">
+                    {# Assume 'profile_form' is passed from Flask if using WTForms #}
+                    <form method="POST" action="{{ url_for('update_profile') }}" class="needs-validation" id="profileForm" novalidate>
+                        {{ profile_form.hidden_tag() if profile_form else '' }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.first_name or '' }}" required>
+                                <div class="invalid-feedback">Please enter your first name.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.last_name or '' }}" required>
+                                 <div class="invalid-feedback">Please enter your last name.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly disabled title="Email cannot be changed">
+                                <div class="form-text">Email cannot be changed.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone or '' }}" pattern="^\+255[0-9]{9}$" aria-describedby="phoneHelp">
+                                <div id="phoneHelp" class="form-text">Format: +255xxxxxxxxx (e.g., +255712345678)</div>
+                                <div class="invalid-feedback">Please enter a valid Tanzanian phone number.</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4">
+                            <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# --- Security Settings Card --- #}
+            <div class="card setting-card mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                 <div class="card-header setting-card-header">
+                    <h2 class="h5 mb-0 fw-semibold"><i class="fas fa-user-shield fa-fw"></i>Security Settings</h2>
+                </div>
+                <div class="card-body p-4">
+                    {# Assume 'password_form' is passed from Flask if using WTForms #}
+                    <form method="POST" action="{{ url_for('update_password') }}" class="needs-validation" id="passwordForm" novalidate>
+                         {{ password_form.hidden_tag() if password_form else '' }}
+                        <div class="mb-3 position-relative">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" name="current_password" required autocomplete="current-password">
+                             <button type="button" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                            <div class="invalid-feedback">Please enter your current password.</div>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="8" aria-describedby="passwordHelp" autocomplete="new-password">
+                            <button type="button" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                            <div id="passwordHelp" class="form-text">Minimum 8 characters.</div>
+                            <div class="invalid-feedback">Password must be at least 8 characters long.</div>
+                        </div>
+                        <div class="mb-4 position-relative">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required autocomplete="new-password">
+                             <button type="button" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                            <div class="invalid-feedback" id="confirmPassword-error">Passwords do not match.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# --- App Preferences Card --- #}
+            <div class="card setting-card mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                 <div class="card-header setting-card-header">
+                    <h2 class="h5 mb-0 fw-semibold"><i class="fas fa-palette fa-fw"></i>App Preferences</h2>
+                </div>
+                <div class="card-body p-4">
+                     {# Assume 'preference_form' is passed from Flask if using WTForms #}
+                    <form method="POST" action="{{ url_for('update_preferences') }}" id="preferenceForm">
+                         {{ preference_form.hidden_tag() if preference_form else '' }}
+                        <!-- Theme Preference -->
+                        <div class="mb-4">
+                            <label class="form-label d-block fw-medium mb-2">Theme</label>
+                            <div class="btn-group w-100 theme-selector" role="group" aria-label="Theme Selection">
+                                <input type="radio" class="btn-check" name="theme" id="themeLight" value="light" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="themeLight" data-theme-value="light">
+                                    <i class="fas fa-sun me-1"></i>Light
+                                </label>
+                                <input type="radio" class="btn-check" name="theme" id="themeDark" value="dark" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="themeDark" data-theme-value="dark">
+                                    <i class="fas fa-moon me-1"></i>Dark
+                                </label>
+                                <input type="radio" class="btn-check" name="theme" id="themeSystem" value="system" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="themeSystem" data-theme-value="system">
+                                    <i class="fas fa-desktop me-1"></i>System
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Language Preference -->
+                        <div class="mb-4">
+                            <label for="languageSelect" class="form-label fw-medium">Language</label>
+                            <select class="form-select" id="languageSelect" name="language">
+                                <option value="en" {% if user.language == 'en' %}selected{% endif %}>English</option>
+                                <option value="sw" {% if user.language == 'sw' %}selected{% endif %}>Swahili</option>
+                            </select>
+                        </div>
+
+                        <!-- Default Currency -->
+                        <div class="mb-4">
+                            <label for="currencySelect" class="form-label fw-medium">Default Currency</label>
+                            <select class="form-select" id="currencySelect" name="currency">
+                                <option value="TZS" {% if user.currency == 'TZS' %}selected{% endif %}>Tanzanian Shilling (TZS)</option>
+                                <option value="USD" {% if user.currency == 'USD' %}selected{% endif %}>US Dollar (USD)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Preferences
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# --- Notification Preferences Card --- #}
+            <div class="card setting-card mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                 <div class="card-header setting-card-header">
+                    <h2 class="h5 mb-0 fw-semibold"><i class="fas fa-bell fa-fw"></i>Notification Preferences</h2>
+                </div>
+                <div class="card-body p-4">
+                    {# Assume 'notification_form' is passed from Flask #}
+                    <form method="POST" action="{{ url_for('update_notifications') }}" id="notificationForm">
+                        {{ notification_form.hidden_tag() if notification_form else '' }}
+                        <h6 class="mb-3 fw-medium">Email Notifications</h6>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="emailTransactions"
+                                   name="email_transactions" {% if user.email_transactions %}checked{% endif %}>
+                            <label class="form-check-label" for="emailTransactions">Transaction Alerts</label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="emailPromotions"
+                                   name="email_promotions" {% if user.email_promotions %}checked{% endif %}>
+                            <label class="form-check-label" for="emailPromotions">Promotions & Offers</label>
+                        </div>
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="emailNewsletter"
+                                   name="email_newsletter" {% if user.email_newsletter %}checked{% endif %}>
+                            <label class="form-check-label" for="emailNewsletter">Monthly Newsletter</label>
+                        </div>
+
+                        <h6 class="mb-3 fw-medium">Push Notifications (App)</h6>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="pushTransactions"
+                                   name="push_transactions" {% if user.push_transactions %}checked{% endif %}>
+                            <label class="form-check-label" for="pushTransactions">Transaction Alerts</label>
+                        </div>
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="pushSecurity"
+                                   name="push_security" {% if user.push_security %}checked{% endif %}>
+                            <label class="form-check-label" for="pushSecurity">Security Alerts</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Notifications
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# --- Danger Zone Card --- #}
+            <div class="card setting-card border-danger animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                 <div class="card-header setting-card-header bg-danger-subtle"> {# Subtle danger bg #}
+                    <h2 class="h5 mb-0 fw-semibold text-danger-emphasis"><i class="fas fa-exclamation-triangle fa-fw"></i>Danger Zone</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-sm-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
+                        <div>
+                            <h6 class="mb-1 fw-medium">Deactivate Account</h6>
+                            <p class="small text-muted mb-2 mb-sm-0">Temporarily disable your account. You can reactivate by logging in.</p>
+                        </div>
+                        <button class="btn btn-outline-warning btn-sm flex-shrink-0 mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#deactivateAccountModal">
+                            <i class="fas fa-user-slash me-1"></i>Deactivate
+                        </button>
+                    </div>
+
+                    <div class="d-sm-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-medium">Delete Account</h6>
+                            <p class="small text-muted mb-2 mb-sm-0">Permanently remove your account and all associated data.</p>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm flex-shrink-0 mt-2 mt-sm-0" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="fas fa-trash-alt me-1"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# --- Modals (Refined Structure) --- #}
+
+<!-- Deactivate Account Modal -->
+<div class="modal fade" id="deactivateAccountModal" tabindex="-1" aria-labelledby="deactivateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            {# Assume 'deactivate_form' passed from Flask if using WTForms #}
+            <form method="POST" action="{{ url_for('deactivate_account') }}" class="needs-validation" id="deactivateForm" novalidate>
+                 {{ deactivate_form.hidden_tag() if deactivate_form else '' }}
+                 <div class="modal-header bg-warning-subtle border-0">
+                    <h5 class="modal-title text-warning-emphasis" id="deactivateModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deactivation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your account will be temporarily disabled. You can reactivate it simply by logging in again.</p>
+                    <label for="deactivatePassword" class="form-label">Enter your password to confirm:</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control" id="deactivatePassword" name="password" required autocomplete="current-password">
+                        <button type="button" class="btn btn-link password-toggle text-secondary" tabindex="-1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                        <div class="invalid-feedback">Password is required to deactivate.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Deactivate Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+             {# Assume 'delete_form' passed from Flask if using WTForms #}
+            <form method="POST" action="{{ url_for('delete_account') }}" class="needs-validation" id="deleteForm" novalidate>
+                 {{ delete_form.hidden_tag() if delete_form else '' }}
+                 <div class="modal-header bg-danger-subtle border-0">
+                    <h5 class="modal-title text-danger-emphasis" id="deleteModalLabel"><i class="fas fa-skull-crossbones me-2"></i>Confirm Account Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger fw-bold">Warning: This action is permanent and cannot be undone. All your data, transactions, and settings will be irrevocably deleted.</p>
+                     <label for="deletePassword" class="form-label">Enter your password to confirm:</label>
+                    <div class="position-relative mb-3">
+                        <input type="password" class="form-control" id="deletePassword" name="password" required autocomplete="current-password">
+                        <button type="button" class="btn btn-link password-toggle text-secondary" tabindex="-1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                         <div class="invalid-feedback">Password is required to delete your account.</div>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="confirmDelete" name="confirm_delete" required>
+                        <label class="form-check-label" for="confirmDelete">I understand this action is irreversible and want to proceed.</label>
+                         <div class="invalid-feedback">You must confirm understanding to delete your account.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete My Account Permanently</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# --- SCRIPTS BLOCK --- #}
+{% block scripts %}
+{{ super() }} {# Include scripts from layout block #}
+<script>
+    // --- Dark Mode / Theme Switching Logic ---
+    const ThemeSwitcher = (() => {
+        const STORAGE_KEY = 'theme';
+        // Get theme preference from Flask user object if available, otherwise default to 'system'
+        const defaultTheme = '{{ user.theme | default('system') }}';
+
+        // Function to get the preferred theme
+        const getPreferredTheme = () => {
+            const storedTheme = localStorage.getItem(STORAGE_KEY);
+            if (storedTheme) {
+                return storedTheme;
+            }
+            // If no stored theme, use the default passed from server (or system)
+            return defaultTheme;
+        };
+
+        // Function to get the system's preferred theme
+        const getSystemTheme = () => {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        };
+
+        // Function to apply the theme
+        const setTheme = (theme) => {
+            let themeToApply;
+            if (theme === 'system') {
+                themeToApply = getSystemTheme();
+            } else {
+                themeToApply = theme;
+            }
+            // Apply the theme attribute to the <html> element
+            document.documentElement.setAttribute('data-bs-theme', themeToApply);
+            console.log(`Applied theme: ${themeToApply} (Chosen: ${theme})`); // Debug log
+
+            // Update the radio button selection state
+            try {
+                 // Construct the ID dynamically
+                const radioId = `theme${theme.charAt(0).toUpperCase() + theme.slice(1)}`;
+                const activeRadio = document.getElementById(radioId);
+                if (activeRadio) {
+                     activeRadio.checked = true;
+                     console.log(`Set radio button ${radioId} to checked`);
+                } else {
+                     console.warn(`Radio button with ID ${radioId} not found.`);
+                }
+
+                // Ensure other radios are unchecked (should happen automatically with type="radio")
+                 document.querySelectorAll('input[name="theme"]').forEach(radio => {
+                     if (radio.id !== radioId) {
+                         radio.checked = false;
+                     }
+                 });
+
+            } catch (e) {
+                 console.error("Error updating radio button state:", e);
+            }
+        };
+
+        // Initial theme application on load
+        setTheme(getPreferredTheme());
+
+        // Listener for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', () => {
+            const storedTheme = localStorage.getItem(STORAGE_KEY);
+            // Only update if the stored theme is 'system' or not set (and default is system)
+            if (storedTheme === 'system' || (!storedTheme && defaultTheme === 'system')) {
+                setTheme('system'); // Re-apply system theme
+            }
+        });
+
+        // Add event listeners to theme radio buttons
+        document.querySelectorAll('input[name="theme"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const newTheme = this.value;
+                localStorage.setItem(STORAGE_KEY, newTheme); // Save user choice
+                setTheme(newTheme); // Apply the chosen theme immediately
+            });
+        });
+
+        // Expose functions if needed elsewhere (optional)
+        return {
+            setTheme,
+            getPreferredTheme
+        };
+    })(); // Immediately invoke the function to set up theme handling
+
+    // --- Other Page-Specific JavaScript ---
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // --- Password Visibility Toggles ---
+        document.querySelectorAll('.password-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                // Find the input within the same parent .position-relative container
+                const wrapper = this.closest('.position-relative');
+                const input = wrapper?.querySelector('input[type="password"], input[type="text"]');
+                const icon = this.querySelector('i');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                        this.setAttribute('aria-label', 'Hide password');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                        this.setAttribute('aria-label', 'Show password');
+                    }
+                }
+            });
+        });
+
+        // --- Bootstrap Form Validation ---
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation');
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                // Clear previous password match error manually if needed
+                 const confirmPwdInput = form.querySelector('#confirmPassword');
+                 const confirmPwdError = form.querySelector('#confirmPassword-error');
+                 if (confirmPwdInput && confirmPwdError) {
+                     if(confirmPwdInput.value === form.querySelector('#newPassword')?.value) {
+                         confirmPwdInput.classList.remove('is-invalid');
+                         confirmPwdError.style.display = 'none';
+                     } else if (confirmPwdInput.value.length > 0) { // Only show if attempted
+                         confirmPwdInput.classList.add('is-invalid');
+                         confirmPwdError.textContent = 'Passwords do not match.';
+                         confirmPwdError.style.display = 'block';
+                     }
+                 }
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    // Optionally show a general error notification
+                    // if (typeof window.showGlobalNotification === 'function') {
+                    //     window.showGlobalNotification('Please correct the errors in the form.', 'warning');
+                    // }
+                }
+
+                form.classList.add('was-validated'); // Add Bootstrap's validation class
+            }, false); // Use capture phase false
+
+             // Optional: Clear validation on input
+            form.querySelectorAll('.form-control, .form-check-input').forEach(input => {
+                 input.addEventListener('input', () => {
+                     if(input.classList.contains('is-invalid')) {
+                          input.classList.remove('is-invalid');
+                     }
+                      // Re-validate confirm password on new password input
+                      if(input.id === 'newPassword' || input.id === 'confirmPassword') {
+                           const confirmPwdInput = form.querySelector('#confirmPassword');
+                            const newPwdInput = form.querySelector('#newPassword');
+                            const confirmPwdError = form.querySelector('#confirmPassword-error');
+                             if (confirmPwdInput && newPwdInput && confirmPwdError) {
+                                 if(confirmPwdInput.value === newPwdInput.value && newPwdInput.value.length > 0) {
+                                      confirmPwdInput.classList.remove('is-invalid');
+                                       confirmPwdInput.classList.add('is-valid'); // Optional valid state
+                                      confirmPwdError.style.display = 'none';
+                                 } else if (confirmPwdInput.value.length > 0) {
+                                      confirmPwdInput.classList.add('is-invalid');
+                                      confirmPwdInput.classList.remove('is-valid');
+                                      confirmPwdError.textContent = 'Passwords do not match.';
+                                      confirmPwdError.style.display = 'block';
+                                 } else {
+                                      confirmPwdInput.classList.remove('is-invalid', 'is-valid');
+                                      confirmPwdError.style.display = 'none';
+                                 }
+                            }
+                      }
+                 });
+            });
+        });
+
+        // --- Password Match Validation (for confirm password field) ---
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const confirmPasswordError = document.getElementById('confirmPassword-error');
+
+        if (newPasswordInput && confirmPasswordInput && confirmPasswordError) {
+            const validateMatch = () => {
+                if (confirmPasswordInput.value.length === 0) {
+                    // Don't validate if confirm field is empty yet
+                    confirmPasswordInput.classList.remove('is-invalid', 'is-valid');
+                    confirmPasswordError.style.display = 'none';
+                    return;
+                }
+                if (newPasswordInput.value === confirmPasswordInput.value && newPasswordInput.value.length >= 8) {
+                    confirmPasswordInput.classList.remove('is-invalid');
+                    confirmPasswordInput.classList.add('is-valid'); // Show valid state
+                    confirmPasswordError.style.display = 'none'; // Hide error message
+                } else {
+                    confirmPasswordInput.classList.remove('is-valid');
+                    confirmPasswordInput.classList.add('is-invalid'); // Show invalid state
+                    confirmPasswordError.textContent = 'Passwords do not match.';
+                    confirmPasswordError.style.display = 'block'; // Show error message
+                }
+            };
+            newPasswordInput.addEventListener('input', validateMatch);
+            confirmPasswordInput.addEventListener('input', validateMatch);
+        }
+
+        // --- Notification Function (Ensure Defined) ---
+        // Prefer global definition in layout.html
+        if (typeof window.showGlobalNotification !== 'function') {
+             console.warn("Defining showGlobalNotification locally in settings.html.");
+             window.showGlobalNotification = function(message, type = 'info', duration = 4000) { /* ... Full function ... */ };
+             if (!document.getElementById('popup-notification-styles')) { /* Add animation styles */ }
+        }
+
+        // --- Flash Message Handling (Display server-side flashes via popups) ---
+         const flashMessagesContainer = document.querySelector('.flash-messages-container'); // Check layout for this
+         if (flashMessagesContainer) {
+             const alerts = flashMessagesContainer.querySelectorAll('.alert');
+             alerts.forEach(alert => {
+                 const message = (alert.innerText || alert.textContent || '').trim();
+                 if (message) {
+                      let type = 'info'; // Default
+                      if (alert.classList.contains('alert-success')) type = 'success';
+                      else if (alert.classList.contains('alert-danger')) type = 'error';
+                      else if (alert.classList.contains('alert-warning')) type = 'warning';
+                      window.showGlobalNotification(message, type);
+                 }
+                 alert.remove(); // Remove the original inline alert
+             });
+             // Optionally remove the container if it's now empty
+             if (!flashMessagesContainer.hasChildNodes()) { flashMessagesContainer.remove(); }
+         }
+
+
+    }); // End DOMContentLoaded
+</script>
+{% endblock %}

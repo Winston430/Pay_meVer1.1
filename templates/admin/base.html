@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-sidebar">
+        <h3>Admin Portal</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.manage_users') }}">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.view_transactions') }}">Transactions</a>
+            </li>
+        </ul>
+    </div>
+    <div class="admin-content">
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+<style>
+.admin-container {
+    display: flex;
+    min-height: calc(100vh - 100px);
+}
+
+.admin-sidebar {
+    width: 250px;
+    background: #343a40;
+    padding: 20px;
+    color: white;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 20px;
+}
+</style>

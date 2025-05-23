@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block title %}About Us - PayMe{% endblock %}
+
+{% block content %}
+<div class="about-header py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">About PayMe Tanzania</h1>
+        <p class="lead">Revolutionizing digital payments since 2018</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Our Story -->
+    <section class="mb-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="mb-4">Our Story</h2>
+                <p class="lead">Born out of a need for simpler, faster payments in Tanzania.</p>
+                <p>PayMe was founded in 2018 with a mission to democratize financial services and make digital payments accessible to everyone. What started as a small mobile payment solution has grown into Tanzania's most trusted financial platform.</p>
+                <p>Today, we serve over {{ "{:,}".format(stats.users) }} users and process more than {{ "{:,}".format(stats.transactions) }} transactions annually.</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/about-story.jpg') }}" alt="Our Story" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </section>
+    
+    <!-- Mission & Values -->
+    <section class="mb-5 py-4 bg-light rounded">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Mission & Values</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-lg bg-primary text-white rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h5>Speed</h5>
+                            <p>Instant transfers with no delays. Your money moves when you need it.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-lg bg-success text-white rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h5>Security</h5>
+                            <p>Bank-grade encryption and fraud protection keep your money safe.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-lg bg-info text-white rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-hand-holding-heart"></i>
+                            </div>
+                            <h5>Accessibility</h5>
+                            <p>Designed for everyone, from tech experts to first-time users.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Our Team -->
+    <section class="mb-5">
+        <h2 class="text-center mb-5">Meet Our Team</h2>
+        <div class="row g-4">
+            {% for member in team_members %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{{ url_for('static', filename='images/team/' + member.avatar) }}" class="card-img-top" alt="{{ member.name }}">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ member.name }}</h5>
+                        <p class="text-primary fw-bold">{{ member.role }}</p>
+                        <p class="card-text">{{ member.bio }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex justify-content-center">
+                            <a href="#" class="text-muted mx-2"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-muted mx-2"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="text-muted mx-2"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Stats -->
+    <section class="py-4 bg-primary text-white rounded">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="display-4 fw-bold">{{ "{:,}".format(stats.users) }}+</div>
+                    <p class="mb-0">Happy Users</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="display-4 fw-bold">{{ "{:,}".format(stats.transactions) }}+</div>
+                    <p class="mb-0">Transactions</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="display-4 fw-bold">{{ stats.years }}+</div>
+                    <p class="mb-0">Years of Trust</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .about-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("{{ url_for('static', filename='images/about-bg.jpg') }}");
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .icon-lg {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .team-member-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

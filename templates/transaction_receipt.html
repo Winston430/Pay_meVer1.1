@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Receipt</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .receipt-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .receipt-header {
+            background: linear-gradient(135deg, #4361ee, #3f37c9);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        .receipt-logo {
+            height: 50px;
+            margin-bottom: 15px;
+        }
+        .receipt-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .receipt-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .receipt-body {
+            padding: 25px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        .detail-value {
+            font-weight: 600;
+            text-align: right;
+        }
+        .amount-row {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        .credit {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+        }
+        .debit {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+        .receipt-footer {
+            padding: 20px;
+            background: #f8f9fa;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        .print-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #4361ee;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .receipt-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <img src="{{ url_for('static', filename='images/payme-logo.png') }}" 
+                 alt="PayMe" class="receipt-logo">
+            <h1 class="receipt-title">Transaction Receipt</h1>
+            <div class="receipt-status">{{ transaction.status }}</div>
+        </div>
+        
+        <div class="receipt-body">
+            <div class="detail-row">
+                <span class="detail-label">Transaction ID:</span>
+                <span class="detail-value">PM{{ "%012d" % transaction.id }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Date & Time:</span>
+                <span class="detail-value">{{ formatted_time }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Transaction Type:</span>
+                <span class="detail-value">{{ transaction.type|title }}</span>
+            </div>
+            
+            {% if transaction.sender %}
+            <div class="detail-row">
+                <span class="detail-label">From:</span>
+                <span class="detail-value">{{ transaction.sender }}</span>
+            </div>
+            {% endif %}
+            
+            {% if transaction.recipient %}
+            <div class="detail-row">
+                <span class="detail-label">To:</span>
+                <span class="detail-value">{{ transaction.recipient }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="detail-row">
+                <span class="detail-label">Description:</span>
+                <span class="detail-value">{{ transaction.description }}</span>
+            </div>
+            
+            <div class="amount-row {{ amount_class }}">
+                <span style="flex: 1; text-align: center;">
+                    {{ amount_display }} TZS
+                </span>
+            </div>
+            
+            {% if transaction.reference %}
+            <div class="detail-row">
+                <span class="detail-label">Reference:</span>
+                <span class="detail-value">{{ transaction.reference }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="receipt-footer">
+            <button class="print-btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+        </div>
+    </div>
+</body>
+</html>

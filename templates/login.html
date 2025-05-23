@@ -1,0 +1,514 @@
+{% extends "layout.html" %}
+{% block title %}Login - PayMe Tanzania{% endblock %}
+
+{# --- CONTENT BLOCK START --- #}
+{% block content %}
+<div class="auth-wrapper">
+    {# Use animation from layout or add here #}
+    <div class="auth-container animate__animated animate__fadeInUp animate__faster">
+        <div class="auth-card shadow-lg">
+            <!-- Card Header -->
+            <div class="auth-header text-center mb-4">
+                <a href="{{ url_for('index') }}">
+                    <i class="fa-solid fa-wallet auth-logo-icon text-primary mb-3"></i>
+                </a>
+                <h1 class="auth-title h3 mb-1">Welcome Back!</h1>
+                <p class="auth-subtitle text-muted">Securely log in to your PayMe account.</p>
+            </div>
+
+            <!-- Form -->
+            {# Pass the 'form' object from your Flask route if using WTForms #}
+            <form method="POST" action="{{ url_for('login') }}" class="auth-form needs-validation" id="loginForm" novalidate>
+                {# Include hidden fields like CSRF token if using WTForms #}
+                {{ form.hidden_tag() if form else '' }}
+
+                <!-- Username/Email Field -->
+                <div class="form-floating mb-3 has-icon" id="username-wrapper">
+                    {# Use WTForms field rendering if form object exists #}
+                    {% if form and form.username %}
+                        {{ form.username(class="form-control", placeholder="Username or Email", required="required", autocomplete="username", id="username") }}
+                        {{ form.username.label(for="username") }}
+                    {% else %}
+                        {# Manual fallback #}
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Username or Email" required autocomplete="username">
+                        <label for="username">Username or Email</label>
+                    {% endif %}
+                    {# Ensure this div exists for error messages #}
+                    <div class="invalid-feedback" id="username-error">Please enter your username or email.</div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-floating mb-3 position-relative has-icon" id="password-wrapper">
+                     {% if form and form.password %}
+                        {{ form.password(class="form-control", placeholder="Password", required="required", autocomplete="current-password", id="password") }}
+                        {{ form.password.label(for="password") }}
+                    {% else %}
+                        {# Manual fallback #}
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required autocomplete="current-password">
+                        <label for="password">Password</label>
+                    {% endif %}
+                    <button type="button" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                     {# Ensure this div exists for error messages #}
+                    <div class="invalid-feedback" id="password-error">Please enter your password.</div>
+                </div>
+
+                <!-- Options: Remember Me & Forgot Password -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                         {% if form and form.remember %}
+                             {{ form.remember(class="form-check-input", id="remember") }}
+                             {{ form.remember.label(class="form-check-label", for="remember") }}
+                         {% else %}
+                              {# Manual fallback #}
+                             <input type="checkbox" id="remember" name="remember" class="form-check-input">
+                             <label class="form-check-label" for="remember">Remember me</label>
+                         {% endif %}
+                    </div>
+                    {# Ensure reset_password_request route exists #}
+                    <a href="{{ url_for('reset_password_request') }}" class="text-link small">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button (with integrated loading spinner) -->
+                <button type="submit" class="btn btn-primary w-100 btn-lg btn-loading" id="submitBtn">
+                    <span class="btn-text">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </span>
+                    {# This spinner is controlled by CSS based on .loading class #}
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </form>
+
+            <!-- Separator -->
+            <div class="separator my-4"><span>OR</span></div>
+
+            <!-- Social Login Buttons -->
+            <div class="social-login d-grid gap-2 mb-4">
+                 {# Safely check config for Google Login #}
+                 {% set google_enabled = config.get('GOOGLE_OAUTH_CLIENT_ID') %}
+                 {% set google_login_url = url_for('google.login') if google_enabled else '#' %}
+                <a href="{{ google_login_url }}" class="btn btn-outline-secondary social-btn google w-100 {% if not google_enabled %}disabled{% endif %}">
+                    <i class="fab fa-google fa-fw me-2"></i> Continue with Google
+                </a>
+                {# Add Facebook or others similarly if configured #}
+            </div>
+
+            <!-- Footer Link -->
+            <div class="auth-footer text-center">
+                <p class="mb-0 text-muted">Don't have an account? <a href="{{ url_for('register') }}" class="text-link fw-medium">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page-specific styles -->
+{# NOTE: Styles specific to login page that are NOT in layout.html #}
+<style>
+    /* --- Authentication Page Specific Styles --- */
+    body {
+        /* Optional: Override layout background for auth pages */
+         background: linear-gradient(135deg, var(--primary-light, #85a0ef) 0%, var(--body-bg, #f7fafd) 50%, var(--primary-light, #85a0ef) 100%);
+    }
+
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Align card to top */
+        min-height: calc(100vh - 100px); /* Adjust based on potential header/footer height */
+        padding: 3rem 1rem;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .auth-card {
+        background: var(--white-color, #ffffff);
+        border-radius: var(--border-radius-lg, 0.75rem);
+        padding: 2.5rem;
+        border: 1px solid var(--bs-border-color-translucent, rgba(0,0,0,.1));
+    }
+
+    .auth-logo-icon {
+        font-size: 3rem;
+        display: inline-block;
+        color: var(--primary-color, #4e73df); /* Use primary color */
+    }
+
+    .auth-title {
+        font-weight: var(--font-weight-bold, 700);
+        color: var(--dark-color, #343a40);
+    }
+    .auth-subtitle {
+         color: var(--medium-gray, #6c757d);
+    }
+
+    /* Form Enhancements - Copied/Refined from previous "fantastic" version */
+    .form-floating > .form-control {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+        padding: 1rem 1rem 1rem 3rem; /* Padding for icon */
+    }
+     .form-floating > .form-control::placeholder { color: transparent; }
+    .form-floating > label {
+        padding: 1rem 1rem 1rem 3rem;
+        color: var(--medium-gray, #6c757d);
+        z-index: 2;
+    }
+    .form-floating.has-icon::before {
+         font-family: "Font Awesome 6 Free";
+         font-weight: 900;
+         position: absolute; left: 1rem; top: 50%;
+         transform: translateY(-50%); color: var(--medium-gray, #6c757d);
+         opacity: 0.6; z-index: 1; transition: var(--transition-base, all 0.3s ease-in-out);
+         pointer-events: none;
+    }
+     .form-floating.has-icon:focus-within::before {
+         color: var(--primary-color, #4e73df); opacity: 1;
+     }
+     #username-wrapper::before { content: "\f007"; } /* fa-user */
+     #password-wrapper::before { content: "\f023"; } /* fa-lock */
+
+    .form-control:focus {
+        border-color: var(--primary-color, #4e73df);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb, 78, 115, 223), 0.2);
+    }
+
+    .password-toggle {
+        position: absolute; right: 0.5rem; top: 50%;
+        transform: translateY(-50%); z-index: 3;
+        color: var(--medium-gray, #6c757d); padding: 0.5rem; cursor: pointer;
+        background: transparent; border: none;
+    }
+    .password-toggle:hover { color: var(--primary-color, #4e73df); }
+
+    .form-check-label { font-size: 0.9rem; color: var(--medium-gray, #6c757d); }
+    .form-check-input:checked {
+         background-color: var(--primary-color, #4e73df);
+         border-color: var(--primary-color, #4e73df);
+    }
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb, 78, 115, 223), 0.25);
+    }
+
+    .text-link {
+        color: var(--primary-color, #4e73df); text-decoration: none;
+        font-weight: var(--font-weight-medium, 500);
+    }
+    .text-link:hover { text-decoration: underline; color: var(--primary-dark, #2e59d9); }
+
+    /* Submit Button Loading State Styles (Integrated Spinner) */
+    .btn-loading { position: relative; transition: background-color 0.3s ease, transform 0.1s ease; }
+    .btn-loading .spinner-border {
+        display: none; position: absolute;
+        left: 50%; top: 50%; transform: translate(-50%, -50%);
+        width: 1.25rem; height: 1.25rem; border-width: .2em;
+    }
+    .btn-loading.loading .btn-text { visibility: hidden; opacity: 0; }
+    .btn-loading.loading .spinner-border { display: inline-block; }
+    .btn-loading.loading { pointer-events: none; cursor: wait; }
+
+    /* Separator Styles */
+    .separator { display: flex; align-items: center; text-align: center;
+        color: var(--medium-gray, #6c757d); font-size: 0.85rem;
+        font-weight: var(--font-weight-medium, 500); }
+    .separator::before, .separator::after { content: ''; flex: 1;
+        border-bottom: 1px solid var(--bs-border-color-translucent, rgba(0,0,0,.1)); }
+    .separator span { padding: 0 1rem; }
+
+    /* Social Login Button Styles */
+    .social-btn { font-weight: var(--font-weight-medium, 500); padding: 0.75rem 1rem;
+        display: flex; align-items: center; justify-content: center;
+        gap: 0.5rem; transition: var(--transition-base, all 0.3s ease-in-out); border-width: 1px; }
+    .social-btn i { font-size: 1.1rem; }
+    .social-btn.google { color: var(--dark-color, #343a40); background-color: var(--white-color, #ffffff);
+        border-color: var(--bs-border-color, #dee2e6); }
+    .social-btn.google:hover { background-color: var(--light-gray, #f8f9fa);
+        border-color: var(--bs-border-color, #dee2e6); }
+    .social-btn.disabled { opacity: 0.65; pointer-events: none; }
+
+    /* Form Validation Feedback Styles */
+    .needs-validation .form-control:invalid,
+    .needs-validation .form-control.is-invalid { border-color: var(--bs-danger, #dc3545); }
+    .needs-validation .form-control:valid,
+    .needs-validation .form-control.is-valid { border-color: var(--bs-success, #198754); }
+    .invalid-feedback { display: none; width: 100%; margin-top: .25rem;
+        font-size: .875em; color: var(--bs-danger, #dc3545); }
+    .was-validated .form-control:invalid ~ .invalid-feedback,
+    .form-control.is-invalid ~ .invalid-feedback { display: block; }
+
+    /* --- Popup Notification Styles (ensure defined ONCE, preferably in layout) --- */
+     @keyframes slideInUpFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+     @keyframes slideOutDownFade { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 20px); } }
+     .popup-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+         padding: 0.8rem 1.5rem; border-radius: var(--border-radius-md, 0.5rem);
+         color: white; font-weight: 500; box-shadow: var(--shadow-lg, 0 1rem 2.5rem rgba(0,0,0,.12));
+         display: flex; align-items: center; justify-content: space-between;
+         min-width: 300px; max-width: 90%; z-index: 1056; /* Above modals */
+         opacity: 0; border: none; /* Ensure no extra border */
+     }
+     .popup-notification.animate-in { animation: slideInUpFade 0.4s ease-out forwards; }
+     .popup-notification.animate-out { animation: slideOutDownFade 0.4s ease-in forwards; }
+     .popup-notification .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); opacity: 0.8; }
+     .popup-notification .btn-close-white:hover { opacity: 1; }
+     /* Add specific background colors based on alert type */
+     .popup-notification.alert-success { background-color: var(--bs-success, #198754); }
+     .popup-notification.alert-danger { background-color: var(--bs-danger, #dc3545); }
+     .popup-notification.alert-warning { background-color: var(--bs-warning, #ffc107); color: var(--dark-color, #343a40); /* Dark text for warning */ }
+     .popup-notification.alert-warning .btn-close-white { filter: none; color: var(--dark-color, #343a40); } /* Adjust close button for warning */
+     .popup-notification.alert-info { background-color: var(--bs-info, #0dcaf0); }
+
+</style>
+{% endblock %}
+{# --- CONTENT BLOCK END --- #}
+
+
+{# --- SCRIPTS BLOCK START --- #}
+{% block scripts %}
+{{ super() }} {# Optional: Include scripts from layout block #}
+<script>
+// Wrap all script logic in a DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Password Visibility Toggle ---
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+    passwordToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const passwordInput = this.closest('.position-relative').querySelector('input[type="password"], input[type="text"]');
+            const icon = this.querySelector('i');
+            if (passwordInput && icon) {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    this.setAttribute('aria-label', 'Hide password');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    this.setAttribute('aria-label', 'Show password');
+                }
+            }
+        });
+    });
+
+    // --- Define the showNotification function globally ---
+    window.showNotification = function(message, type = 'info', duration = 5000) {
+        // Remove any existing notifications
+        document.querySelectorAll('.popup-notification').forEach(el => el.remove());
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        const alertType = type === 'error' ? 'danger' : type;
+        notification.className = `popup-notification alert alert-${alertType}`;
+        
+        // Add content with icon
+        let iconClass = 'fa-info-circle'; // Default icon
+        if (type === 'success') iconClass = 'fa-check-circle';
+        else if (type === 'error' || type === 'danger') iconClass = 'fa-exclamation-triangle';
+        else if (type === 'warning') iconClass = 'fa-exclamation-circle';
+
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas ${iconClass} fa-fw"></i>
+                <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close ${alertType === 'warning' ? '' : 'btn-close-white'}" aria-label="Close"></button>
+        `;
+
+        // Append to body
+        document.body.appendChild(notification);
+        
+        // Start animation
+        setTimeout(() => notification.classList.add('animate-in'), 10);
+
+        // Setup close button
+        const closeBtn = notification.querySelector('.btn-close');
+        let closeTimer;
+
+        const closeNotification = () => {
+            clearTimeout(closeTimer);
+            notification.classList.remove('animate-in');
+            notification.classList.add('animate-out');
+            notification.addEventListener('animationend', () => notification.remove(), { once: true });
+        };
+
+        closeBtn.addEventListener('click', closeNotification);
+
+        // Auto-close timer
+        closeTimer = setTimeout(closeNotification, duration);
+        
+        return notification;
+    };
+
+    // Create alias for showGlobalNotification to ensure compatibility
+    window.showGlobalNotification = window.showNotification;
+
+    // --- Form Submission and Validation Handling (AJAX Version) ---
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (loginForm && submitBtn) {
+        loginForm.addEventListener('submit', function(event) {
+            // ALWAYS prevent default for AJAX submission
+            event.preventDefault();
+            event.stopPropagation();
+
+            // --- Clear previous validation states ---
+            loginForm.classList.remove('was-validated');
+            loginForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            loginForm.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.style.display = 'none';
+                // Store default message if not already done
+                if (!el.dataset.defaultError) {
+                    el.dataset.defaultError = el.textContent;
+                }
+                el.textContent = el.dataset.defaultError; // Reset text
+            });
+
+            // --- Basic HTML5 Validation Check ---
+            if (!loginForm.checkValidity()) {
+                loginForm.classList.add('was-validated'); // Show standard validation styles
+                const firstInvalidField = loginForm.querySelector(':invalid');
+                if (firstInvalidField) {
+                    const feedback = firstInvalidField.closest('.form-floating, .mb-3')?.querySelector('.invalid-feedback');
+                    if (feedback) feedback.style.display = 'block';
+                    firstInvalidField.focus(); // Focus on first invalid field
+                }
+                showNotification('Please fill out all required fields.', 'warning');
+                return; // Stop if basic validation fails
+            }
+
+            // --- Show Loading State (using integrated spinner) ---
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // --- Prepare Form Data ---
+            const formData = new FormData(loginForm);
+
+            // --- Perform AJAX Request using Fetch ---
+            console.log("Attempting fetch to:", loginForm.action);
+
+            fetch(loginForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    // Note: Content-Type is automatically set by FormData
+                    // Add CSRF token header if needed
+                    'X-CSRFToken': formData.get('csrf_token') || document.querySelector('input[name="csrf_token"]')?.value || ''
+                },
+                credentials: 'same-origin' // Include cookies
+            })
+            .then(response => {
+                console.log("Fetch response received:", response.status);
+                
+                // Try to parse as JSON
+                return response.json()
+                    .then(data => ({ ok: response.ok, status: response.status, data }))
+                    .catch(err => {
+                        // Handle JSON parse error
+                        console.error("Error parsing JSON response:", err);
+                        return { 
+                            ok: false, 
+                            status: response.status, 
+                            data: { error: 'Invalid server response format.' } 
+                        };
+                    });
+            })
+            .then(result => {
+                console.log("Processing result:", result);
+                
+                if (result.ok) {
+                    // --- Handle SUCCESS Response ---
+                    if (result.data.success && result.data.redirect) {
+                        console.log("Login successful, redirecting...");
+                        showNotification(result.data.message || 'Login successful! Redirecting...', 'success');
+                        
+                        // Redirect after notification displays
+                        setTimeout(() => {
+                            window.location.href = result.data.redirect;
+                        }, 1200);
+                    } else {
+                        console.warn("Success response without redirect:", result.data);
+                        showNotification(result.data.message || 'Login succeeded.', 'success');
+                        submitBtn.classList.remove('loading');
+                        submitBtn.disabled = false;
+                    }
+                } else {
+                    // --- Handle ERROR Response ---
+                    console.warn("Error response:", result);
+                    
+                    // Show main error message
+                    const errorMessage = result.data?.error || 'Login failed. Please try again.';
+                    showNotification(errorMessage, 'error');
+                    
+                    // Handle field-specific errors
+                    if (result.data?.field_errors) {
+                        loginForm.classList.add('was-validated');
+                        
+                        for (const [fieldId, message] of Object.entries(result.data.field_errors)) {
+                            const inputElement = document.getElementById(fieldId);
+                            const feedbackElement = document.getElementById(`${fieldId}-error`);
+                            
+                            if (inputElement) {
+                                inputElement.classList.add('is-invalid');
+                                inputElement.setAttribute('aria-invalid', 'true');
+                            }
+                            
+                            if (feedbackElement && message) {
+                                feedbackElement.textContent = message;
+                                feedbackElement.style.display = 'block';
+                            }
+                        }
+                        
+                        // Focus first invalid field
+                        const firstInvalid = loginForm.querySelector('.is-invalid');
+                        if (firstInvalid) firstInvalid.focus();
+                    }
+                    
+                    // Reset button state
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                // --- Handle Network Errors ---
+                console.error("Network error:", error);
+                showNotification('Network error. Please check your connection and try again.', 'error');
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            });
+        });
+    }
+
+    // --- Icon Wrapper Fallback (Add .has-icon class via JS if needed) ---
+    document.querySelectorAll('.form-floating').forEach(wrapper => {
+        const input = wrapper.querySelector('input');
+        if (input && !wrapper.classList.contains('has-icon')) {
+            if (input.id === 'username' || input.name === 'username') {
+                wrapper.classList.add('has-icon');
+                wrapper.id = 'username-wrapper';
+            } else if (input.id === 'password' || input.name === 'password') {
+                wrapper.classList.add('has-icon');
+                wrapper.id = 'password-wrapper';
+            }
+        }
+    });
+
+    // --- Add animation styles if not already present ---
+    if (!document.getElementById('popup-notification-styles')) {
+        const animStyle = document.createElement('style');
+        animStyle.id = 'popup-notification-styles';
+        animStyle.textContent = `
+            @keyframes slideInUpFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+            @keyframes slideOutDownFade { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 20px); } }
+            .popup-notification.animate-in { animation: slideInUpFade 0.4s ease-out forwards; }
+            .popup-notification.animate-out { animation: slideOutDownFade 0.4s ease-in forwards; }
+        `;
+        document.head.appendChild(animStyle);
+    }
+});
+</script>
+{% endblock %}
+{# --- SCRIPTS BLOCK END --- #}

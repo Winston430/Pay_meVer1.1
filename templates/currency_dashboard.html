@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Currency Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-wallet me-2"></i>Currency Dashboard</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Current Balances -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">TZS Balance</h5>
+                                    <h3 class="text-primary">{{ wallet_balance_tzs|format_currency }} TZS</h3>
+                                    <small class="text-muted">Current rate: 1 USD = {{ (1/usd_rate)|round(2) }} TZS</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">USD Value</h5>
+                                    <h3 class="text-success">{{ wallet_balance_usd|format_currency }} USD</h3>
+                                    <small class="text-muted">1 TZS = {{ usd_rate|round(6) }} USD</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversion Form -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Convert Currency</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('convert_currency') }}">
+                                <div class="mb-3">
+                                    <label class="form-label">Amount in TZS to convert to USD</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="amount" 
+                                               min="100" step="100" required>
+                                        <span class="input-group-text">TZS</span>
+                                    </div>
+                                    <small class="text-muted">Minimum: 100 TZS</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-exchange-alt me-2"></i> Convert to USD
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversion History -->
+                    <h5 class="mt-4 mb-3"><i class="fas fa-history me-2"></i>Recent Conversions</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>TZS Amount</th>
+                                    <th>USD Amount</th>
+                                    <th>Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for conv in history %}
+                                <tr>
+                                    <td>{{ conv.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ conv.amount_tzs|format_currency }} TZS</td>
+                                    <td>{{ conv.amount_usd|format_currency }} USD</td>
+                                    <td>1 USD = {{ (1/conv.rate)|round(2) }} TZS</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No conversion history yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
